@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CoverPanda — Franchisee Onboarding Portal (Bright Pickleball · Tucson #1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="../journey-nav.js"></script>
+<style>
+  :root{
+    --bg:#fbfaf8;--panel:#f6f4f0;--stone:#efece6;--border:#e8e4dc;--border2:#ddd7cd;--card:#fff;
+    --ink:#131210;--ink-soft:#36342f;--body:#4a4842;--muted:#6e6b63;--muted2:#8a867c;
+    --ember:#ff3e00;--ember-soft:#ffece4;--ember-deep:#c93100;--green:#00a843;--green-soft:#e3f6ea;--green-deep:#00702e;
+    --blue:#0084ec;--blue-soft:#e6f2fd;--violet:#6e56e8;--violet-soft:#efecfd;--amber:#a87a08;--amber-soft:#faf2dd;
+    --font:'Instrument Sans',-apple-system,sans-serif;--display:'Fraunces',Georgia,serif;--mono:'Spline Sans Mono',ui-monospace,monospace;
+    --inset:#efece6 0 0 0 1px inset;--inset2:#e8e4dc 0 0 0 1px inset;--pop:0 1px 2px rgba(19,18,16,.05),0 12px 34px rgba(19,18,16,.12);--pop-lg:0 2px 6px rgba(19,18,16,.07),0 24px 64px rgba(19,18,16,.16);
+    --spring:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--body);-webkit-font-smoothing:antialiased;letter-spacing:-.008em;font-size:14px;min-height:100vh}
+  .ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .ic--s{width:13px;height:13px}.ic--l{width:20px;height:20px}
+
+  /* portal top bar */
+  .topbar{position:sticky;top:0;z-index:60;background:var(--card);border-bottom:1px solid var(--border);padding:0 26px}
+  .tb-row{display:flex;align-items:center;gap:13px;height:58px;max-width:1080px;margin:0 auto}
+  .tb-logo{width:30px;height:30px;border-radius:9px;background:var(--ink);display:grid;place-items:center;flex:none}
+  .tb-brand{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .tb-sub{font-size:11.5px;color:var(--muted)}
+  .tb-spacer{flex:1}
+  .tb-prog{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+  .tb-ring{font-family:var(--display);font-size:15px;color:var(--ink)}
+  .tb-av{width:32px;height:32px;border-radius:50%;background:var(--violet);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+  .tabs{display:flex;gap:2px;max-width:1080px;margin:0 auto}
+  .tabs button{background:none;border:0;font-family:var(--font);font-size:13px;font-weight:600;color:var(--muted);padding:11px 14px;cursor:pointer;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:7px}
+  .tabs button.on{color:var(--ink);border-bottom-color:var(--ink)}
+  .tabs button:disabled{color:var(--muted2);cursor:default;opacity:.6}
+  .tabs .badge{font-size:10px;font-weight:700;background:var(--ember);color:#fff;border-radius:99px;padding:1px 6px}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 26px 90px}
+
+  /* welcome */
+  .welcome{display:flex;gap:16px;align-items:flex-start;background:var(--ink);color:#fff;border-radius:18px;padding:22px 24px;margin-bottom:22px}
+  .welcome .wic{width:44px;height:44px;border-radius:13px;background:#262420;display:grid;place-items:center;flex:none}
+  .welcome h1{font-family:var(--display);font-weight:500;font-size:24px;letter-spacing:-.01em}
+  .welcome p{font-size:13.5px;color:#cdc9c1;margin-top:5px;line-height:1.55;max-width:560px}
+  .welcome .wx{margin-left:auto;color:#8d897f;cursor:pointer;background:none;border:0}
+
+  .seclab{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2)}
+
+  /* phase rows */
+  .phase{background:var(--card);border-radius:15px;box-shadow:var(--inset2);margin-bottom:11px;overflow:hidden}
+  .phase.open{box-shadow:var(--inset2),var(--pop)}
+  .ph-head{display:flex;align-items:center;gap:13px;padding:16px 18px;cursor:pointer}
+  .ph-ic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none;background:var(--ncs);color:var(--nc)}
+  .ph-t{font-size:15px;font-weight:700;color:var(--ink)}
+  .ph-meta{font-size:12px;color:var(--muted);margin-top:1px}
+  .ph-wk{font-family:var(--mono);font-size:11px;color:var(--muted2);background:var(--panel);border-radius:7px;padding:4px 9px;white-space:nowrap}
+  .ph-prog{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .ph-bar{width:78px;height:6px;border-radius:99px;background:var(--panel);overflow:hidden}
+  .ph-bar>div{height:100%;background:var(--nc);border-radius:99px;transition:width .4s var(--spring)}
+  .ph-pct{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+  .ph-chev{color:var(--muted2);transition:transform .25s var(--spring)}
+  .phase.open .ph-chev{transform:rotate(90deg)}
+  .ph-body{display:none;padding:2px 18px 16px 18px}
+  .phase.open .ph-body{display:block}
+
+  /* tasks */
+  .task{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid #f4f1ec}
+  .task .tk{width:20px;height:20px;border-radius:50%;border:1.6px solid var(--border2);flex:none;margin-top:1px;display:grid;place-items:center;color:transparent;cursor:pointer;transition:all .14s}
+  .task.done .tk{background:var(--green);border-color:var(--green);color:#fff}
+  .task .tt{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .task.done .tt{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--border2)}
+  .task .td{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
+  .task .tact{margin-left:auto;display:flex;align-items:center;gap:7px;flex:none}
+  .pill{font-size:10.5px;font-weight:700;border-radius:99px;padding:4px 9px;white-space:nowrap}
+  .pill.up{color:var(--ink-soft);background:var(--panel)}
+  .pill.opt{color:var(--muted2);background:transparent;box-shadow:var(--inset2)}
+  .pill.done{color:var(--green-deep);background:var(--green-soft)}
+
+  /* inline vendor-connect card */
+  .vconnect{margin:10px 0 4px 32px;background:var(--panel);border-radius:13px;box-shadow:var(--inset2);padding:14px 15px}
+  .vconnect.engaged{box-shadow:0 0 0 1.5px var(--green) inset;background:var(--green-soft)}
+  .vconnect.requested{box-shadow:0 0 0 1.5px var(--amber) inset;background:var(--amber-soft)}
+  .vc-top{display:flex;align-items:center;gap:10px}
+  .vc-pa{width:28px;height:28px;border-radius:9px;background:var(--ink);display:grid;place-items:center;flex:none}
+  .vc-lead{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .vc-sub{font-size:11.5px;color:var(--muted);margin-top:1px;line-height:1.45}
+  .vc-row{display:flex;align-items:center;gap:12px;margin-top:12px;background:var(--card);border-radius:11px;box-shadow:var(--inset2);padding:11px 13px}
+  .vc-logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:14px;color:#fff;flex:none}
+  .vc-name{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .vc-meta{font-size:11px;color:var(--muted);margin-top:1px}
+  .vbadge{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:2px 7px}
+  .vbadge.cp{color:var(--green-deep);background:var(--green-soft)}
+  .vbadge.req{color:var(--amber);background:var(--amber-soft)}
+  .vbadge.wait{color:var(--amber);background:#fff}
+  .vbadge.alt{color:var(--muted);background:var(--stone)}
+  .vc-alt{font-size:11.5px;color:var(--muted);margin-top:9px;padding-left:2px}
+  .vc-alt a{color:var(--ink-soft);text-decoration:underline;cursor:pointer}
+
+  /* vendors tab roster */
+  .roster{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:18px}
+  @media (max-width:720px){.roster{grid-template-columns:1fr}}
+  .rcard{background:var(--card);border-radius:15px;box-shadow:var(--inset2);padding:16px 17px}
+  .rcard.connected{box-shadow:0 0 0 1.4px var(--green) inset}
+  .rcard.requested{box-shadow:0 0 0 1.4px var(--amber) inset}
+  .rc-head{display:flex;align-items:center;gap:11px}
+  .rc-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--ncs);color:var(--nc)}
+  .rc-cat{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .rc-need{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .rc-vendor{display:flex;align-items:center;gap:11px;margin-top:13px;padding-top:13px;border-top:1px solid #f4f1ec}
+  .rc-vlogo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:12px;color:#fff;flex:none}
+  .rc-vn{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .rc-vs{font-size:11px;font-weight:600;margin-top:1px}
+  .rc-vs.ok{color:var(--green-deep)}.rc-vs.wait{color:var(--amber)}
+  .rc-empty{margin-top:13px;padding-top:13px;border-top:1px solid #f4f1ec;display:flex;align-items:center;gap:10px}
+
+  /* drawer */
+  .scrim{position:fixed;inset:0;background:rgba(19,18,16,.34);backdrop-filter:blur(2px);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:500px;max-width:96vw;background:var(--bg);z-index:310;box-shadow:var(--pop-lg);transform:translateX(106%);transition:transform .38s var(--spring);display:flex;flex-direction:column}
+  .drawer.on{transform:none}
+  .dhead{display:flex;align-items:center;gap:10px;padding:16px 20px 14px;border-bottom:1px solid var(--border)}
+  .dback{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:var(--muted);background:none;border:0;flex:none}
+  .dback:hover{background:var(--panel)}
+  .dback .ic{transform:rotate(180deg)}
+  .dh-id{flex:1;min-width:0}
+  .dh-t{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dh-s{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .dhead .x{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:var(--muted);flex:none}
+  .dhead .x:hover{background:var(--panel)}
+  .dbody{flex:1;overflow-y:auto;padding:20px 22px}
+  .dfoot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:9px;align-items:center;background:var(--bg)}
+  .row{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--body);padding:6px 0;line-height:1.5}
+  .row .ic{color:var(--green);margin-top:2px}
+  .note{font-size:12px;color:var(--muted);line-height:1.55;background:var(--panel);border-radius:12px;padding:12px 14px;margin-top:14px}
+  .note b{color:var(--ink-soft)}
+
+  /* stepper */
+  .stepper{display:flex;align-items:center;gap:7px;margin-bottom:18px}
+  .stp{display:flex;align-items:center;gap:7px}
+  .stp .sd{width:22px;height:22px;border-radius:50%;box-shadow:var(--inset2);display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--muted2);background:var(--card)}
+  .stp .sl{font-size:11px;font-weight:700;color:var(--muted2);white-space:nowrap}
+  .stp.on .sd{background:var(--ink);color:#fff;box-shadow:none}.stp.on .sl{color:var(--ink)}
+  .stp.done .sd{background:var(--green);color:#fff;box-shadow:none}.stp.done .sl{color:var(--ink-soft)}
+  .stp-ln{flex:1;height:1.5px;background:var(--border);min-width:10px}
+
+  /* profile */
+  .prof-hero{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+  .av{border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:600;color:#fff;flex:none;position:relative;width:56px;height:56px;font-size:19px}
+  .av .vck{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;background:var(--green);border:2.5px solid var(--bg);display:grid;place-items:center;color:#fff}
+  .av .vck .ic{width:11px;height:11px}
+  .prof-name{font-size:17px;font-weight:700;color:var(--ink);font-family:var(--display)}
+  .prof-title{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+  .prof-stats{font-size:12px;color:var(--ink-soft);font-weight:600;margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .prof-stats .st{color:var(--amber)}
+  .prof-stats span.dot{color:var(--border2)}
+  .ribbon{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;border-radius:10px;padding:9px 12px;margin-bottom:12px}
+  .ribbon.ok{color:var(--green-deep);background:var(--green-soft)}
+  .ribbon.alt{color:var(--amber);background:var(--amber-soft)}
+  .prof-blurb{font-size:13.5px;line-height:1.6;color:var(--body)}
+  .prodview{display:flex;gap:10px;align-items:flex-start;padding:7px 0}
+  .prodview .pv-ic{width:18px;height:18px;border-radius:6px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;flex:none;margin-top:1px}
+  .pv-n{font-size:13px;font-weight:600;color:var(--ink)}
+  .pv-d{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .quote{background:var(--panel);border-radius:12px;padding:12px 14px;margin-bottom:9px}
+  .qstars{font-size:11px;color:var(--amber);letter-spacing:1.5px}
+  .quote p{font-size:12.5px;line-height:1.55;color:var(--ink-soft);margin-top:5px;font-style:italic}
+  .quote .qa{font-size:11px;color:var(--muted);margin-top:7px;font-weight:600}
+  .contact{background:var(--card);border-radius:12px;box-shadow:var(--inset2);padding:4px 14px 12px}
+  .contact .crow{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-soft);padding:9px 0;border-bottom:1px solid #f4f1ec}
+  .contact .crow .ic{color:var(--muted2)}
+  .locknote{display:flex;gap:8px;font-size:11px;color:var(--muted);line-height:1.5;padding-top:10px}
+  .locknote .ic{color:var(--muted2);flex:none;margin-top:1px}
+
+  /* tailor */
+  .dstep-h{font-size:18px;font-weight:600;font-family:var(--display);color:var(--ink)}
+  .dstep-s{font-size:12.5px;color:var(--muted);margin:4px 0 14px;line-height:1.5}
+  .prod{display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border-radius:11px;box-shadow:var(--inset2);background:var(--card);margin-bottom:8px;cursor:pointer;transition:box-shadow .12s}
+  .prod.on{box-shadow:0 0 0 1.6px var(--ink) inset}
+  .cbox{width:19px;height:19px;border-radius:6px;box-shadow:var(--inset2);display:grid;place-items:center;color:transparent;flex:none;margin-top:1px;background:var(--card)}
+  .prod.on .cbox{background:var(--ink);color:#fff;box-shadow:none}
+  .prod .pn{font-size:13px;font-weight:600;color:var(--ink)}
+  .prod .pd{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .prod .pa{margin-left:auto;font-size:11px;font-weight:700;color:var(--ink-soft);white-space:nowrap;font-family:var(--mono);padding-left:8px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 4px}
+  .chip{font-size:12px;font-weight:600;border-radius:99px;padding:7px 13px;box-shadow:var(--inset2);background:var(--card);color:var(--ink-soft);cursor:pointer;border:0;font-family:var(--font)}
+  .chip.on{background:var(--ink);color:#fff;box-shadow:none}
+  .ta{width:100%;min-height:64px;resize:vertical;border-radius:11px;box-shadow:var(--inset2);background:var(--card);border:0;padding:11px 13px;font-family:var(--font);font-size:13px;color:var(--ink);margin-top:6px}
+  .ta:focus{outline:none;box-shadow:0 0 0 1.5px var(--ink) inset}
+
+  /* review */
+  .reqcard{background:var(--card);border-radius:13px;box-shadow:var(--inset2);padding:2px 14px;margin-bottom:14px}
+  .rq-row{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #f4f1ec;font-size:12.5px;align-items:baseline}
+  .reqcard .rq-row:last-child{border-bottom:0}
+  .rq-row>span{color:var(--muted);min-width:78px;flex:none}
+  .rq-row>b,.rq-row>div{color:var(--ink);font-weight:600;text-align:right;margin-left:auto}
+  .rq-row.top{align-items:flex-start}
+  .rq-li{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-bottom:5px}
+  .rq-li .ic{color:var(--green);width:13px;height:13px;flex:none}
+  .attach{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-soft);background:var(--card);box-shadow:var(--inset2);border-radius:10px;padding:10px 12px;margin-bottom:7px}
+  .attach .ic{color:var(--muted2)}
+
+  /* sent */
+  .sent-ok{width:64px;height:64px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:6px auto 16px}
+  .sent-ok .ic{width:30px;height:30px;stroke-width:2.2}
+  .lifecycle{display:flex;align-items:center;gap:7px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+  .lc{font-size:11px;font-weight:700;padding:6px 11px;border-radius:99px;white-space:nowrap}
+  .lc.done{background:var(--green-soft);color:var(--green-deep)}
+  .lc.now{background:var(--ink);color:#fff}
+  .lc.next{box-shadow:var(--inset2);color:var(--muted2)}
+  .lc-ar{color:var(--border2)}
+
+  /* proposal */
+  .proposal{border-radius:14px;box-shadow:var(--inset2);overflow:hidden;margin-bottom:6px}
+  .prop-head{display:flex;align-items:center;gap:11px;padding:14px 16px;color:#fff}
+  .prop-head .vc-logo{box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+  .prop-ht{font-size:13.5px;font-weight:700}
+  .prop-hs{font-size:11px;opacity:.85;margin-top:1px}
+  .prop-body{background:var(--card);padding:4px 16px 14px}
+  .prop-line{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #f4f1ec}
+  .pl-n{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .pl-d{font-size:11px;color:var(--muted);margin-top:1px}
+  .pl-a{font-size:12px;font-weight:700;color:var(--ink-soft);font-family:var(--mono);white-space:nowrap}
+  .prop-total{display:flex;justify-content:space-between;align-items:center;padding:13px 0 6px;font-size:13px}
+  .prop-total span{color:var(--muted)}
+  .prop-total b{font-size:17px;font-family:var(--display);color:var(--ink)}
+  .prop-fine{font-size:10.5px;color:var(--muted2);line-height:1.5;padding-top:8px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font);font-size:13px;font-weight:600;border:0;border-radius:999px;cursor:pointer;padding:9px 15px;transition:transform .1s,background .15s;text-decoration:none;white-space:nowrap}
+  .btn:active{transform:scale(.98)}
+  .btn--dark{background:var(--ink);color:#fff}.btn--dark:hover{background:#2e2c28}
+  .btn--green{background:var(--green);color:#fff}.btn--green:hover{background:#009039}
+  .btn--ghost{background:var(--card);color:var(--ink-soft);box-shadow:var(--inset2)}.btn--ghost:hover{background:var(--panel)}
+  .btn--sm{padding:7px 12px;font-size:12px}.btn--lg{padding:12px 19px;font-size:14px}.btn--block{width:100%}
+  .mlink{color:var(--muted);cursor:pointer;font-size:12px;background:none;border:0;font-family:var(--font)}.mlink:hover{color:var(--ink)}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);z-index:400;background:var(--ink);color:#fff;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:11px;box-shadow:var(--pop-lg);transition:transform .35s var(--spring);max-width:92vw}
+  #toast.on{transform:translateX(-50%) translateY(0)}
+  #toast .ic{color:#7ee2a4}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-panda" viewBox="0 0 26 26"><circle cx="9.7" cy="13.3" r="1.5" fill="#fff" stroke="none"/><circle cx="16.3" cy="13.3" r="1.5" fill="#fff" stroke="none"/><path d="M10.5 17.2c.9 1 3.1 1 4 0" stroke="#fff" stroke-width="1.4" fill="none"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l1.9 5.7L20 9.6l-5.6 2.3L12 18l-2.4-6.1L4 9.6l6.1-1.9z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v-4M12 17V8M17 13v-3"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6"/><path d="M4 9v11M20 9v11M8 12v5M12 12v5M16 12v5"/><path d="M2 20h20"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 4.6a3.5 3.5 0 0 1 0 6.8M17.5 14.3c2.4.8 4 2.8 4 5.7"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a4 4 0 0 0 6 0zM19 7l-3 7a4 4 0 0 0 6 0z"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h6"/></symbol>
+  <symbol id="i-store" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M4 9v11h16V9M4 9h16M9 20v-6h6v6"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-hammer" viewBox="0 0 24 24"><path d="M14 7l5 5M3 21l8-8M13 6l4-4 4 4-4 4zM7 11l6 6"/></symbol>
+  <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a4 4 0 0 1 0 8"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 11.5a8 8 0 0 1-11.6 7.2L3 21l2.3-6.4A8 8 0 1 1 21 11.5z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+</svg>
+
+<div class="topbar">
+  <div class="tb-row">
+    <span class="tb-logo"><svg width="18" height="18" viewBox="0 0 26 26"><use href="#i-panda"/></svg></span>
+    <div><div class="tb-brand">Bright Pickleball</div><div class="tb-sub">Tucson #1 · onboarding portal</div></div>
+    <span class="tb-spacer"></span>
+    <div class="tb-prog"><span>Your launch</span><span class="tb-ring" id="tbPct">0%</span></div>
+    <span class="tb-av">MC</span>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="wrap" id="wrap"></div>
+
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer"></div>
+<div id="toast"></div>
+
+<script>
+const $id=s=>document.getElementById(s);
+function ic(id,c){ return `<svg class="ic ${c||''}"><use href="#${id}"/></svg>`; }
+function toast(msg){ const t=$id('toast'); t.innerHTML=ic('i-check')+`<span>${msg}</span>`; t.classList.add('on'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('on'),3600); }
+const firstName=n=>n.split(' ')[0];
+function avatar(hue,initials,size,verified){
+  const s=size||56, f=Math.round(s/3);
+  return `<div class="av" style="width:${s}px;height:${s}px;font-size:${f}px;background:linear-gradient(135deg,hsl(${hue} 68% 58%),hsl(${(+hue+34)} 70% 45%))">${initials}${verified?`<span class="vck">${ic('i-check','ic--s')}</span>`:''}</div>`;
+}
+
+/* ---------- vendor catalog (CoverPanda services + a real marketplace alternative each) ---------- */
+const VENDORS = {
+  formation:{ key:'formation', cat:'Entity & legal', icon:'i-building', color:'violet',
+    name:'CoverPanda Accounting', logo:'CP', logoBg:'var(--ink)', badge:'cp', badgeText:'CoverPanda service',
+    person:'Dana Okafor', title:'Lead formation specialist', initials:'DO', hue:'262', firm:'CoverPanda Accounting', loc:'Serves Arizona · remote',
+    rating:'4.9', reviews:128, response:'~2 hrs',
+    blurb:'Forms your LLC + EIN, files your DBA, and opens your books the same week — so every build cost is categorized from day one and your lease can be signed in your entity’s name.',
+    contact:{phone:'(520) •••‑••12', email:'dana@•••', site:'coverpanda.co'},
+    products:[
+      {name:'LLC / entity formation + EIN', note:'Filed with the state + IRS', amount:'$650 + filing', rec:true},
+      {name:'DBA + registered agent (year 1)', note:'Operating name + compliance address', amount:'$240', rec:true},
+      {name:'Books opened on the brand chart of accounts', note:'Every build cost categorized day one', amount:'Included', rec:true},
+      {name:'Operating agreement drafting', note:'Add-on · multi-member ownership', amount:'$300', rec:false},
+    ],
+    quotes:[
+      {text:'Had my LLC, EIN, and books open in nine days — I signed my lease the next week.', who:'Marcus T.', unit:'Bright Pickleball Mesa #1'},
+      {text:'She caught a registration step my old attorney had missed entirely.', who:'Priya N.', unit:'Scottsdale #2'},
+    ],
+    totalLabel:'Estimated one-time', total:'$890 + state fees',
+    alt:{ name:'Hatch Legal', logo:'HL', logoBg:'#5b6470', badge:'alt', badgeText:'Marketplace alternative',
+      person:'Renata Cole', title:'Franchise formation attorney', initials:'RC', hue:'210', firm:'Hatch Legal · Phoenix, AZ', loc:'Serves AZ',
+      rating:'4.7', reviews:64, response:'~1 day',
+      blurb:'A boutique franchise attorney who handles entity formation, EIN, and operating agreements end-to-end. Files to CoverPanda so your books still open on the brand template.',
+      contact:{phone:'(602) •••‑••40', email:'renata@•••', site:'hatchlegal.com'},
+      quotes:[{text:'Thorough on the legal side — wanted a real attorney on the entity and got one.', who:'Will F.', unit:'Bright Pickleball Gilbert #1'}] } },
+
+  lending:{ key:'lending', cat:'Lending', icon:'i-bank', color:'amber',
+    name:'CoverPanda Lending', logo:'CP', logoBg:'var(--amber)', badge:'cp', badgeText:'CoverPanda service',
+    person:'Theo Marsh', title:'SBA build-out advisor', initials:'TM', hue:'38', firm:'CoverPanda Lending', loc:'Nationwide · SBA preferred',
+    rating:'4.8', reviews:96, response:'~3 hrs',
+    blurb:'SBA build-out + equipment financing pre-scoped to a Bright Pickleball unit. Pre-qualify with no hard credit pull, then close in weeks instead of months.',
+    contact:{phone:'(480) •••‑••07', email:'theo@•••', site:'coverpanda.co'},
+    products:[
+      {name:'SBA 7(a) build-out financing', note:'Pre-scoped to a Bright Pickleball unit', amount:'up to $450K', rec:true},
+      {name:'Equipment & FF&E financing', note:'Courts, nets, POS, retail fixtures', amount:'up to $120K', rec:true},
+      {name:'$25K operating line of credit', note:'Covers your operating minimum', amount:'$25,000', rec:true},
+      {name:'Owner-occupied real estate loan', note:'Add-on · if you buy the building', amount:'Quoted', rec:false},
+    ],
+    quotes:[
+      {text:'Pre-qualified without a hard pull, then closed my build-out loan in three weeks.', who:'Devon R.', unit:'Bright Pickleball Chandler #1'},
+      {text:'They knew the build-out numbers before I did. No guesswork.', who:'Sam K.', unit:'Tempe #1'},
+    ],
+    totalLabel:'Pre-qualified up to', total:'$595,000',
+    alt:{ name:'Apex SBA Partners', logo:'AX', logoBg:'#7a6a4a', badge:'alt', badgeText:'Marketplace alternative',
+      person:'Marcus Webb', title:'SBA loan advisor', initials:'MW', hue:'20', firm:'Apex SBA Partners · Tucson, AZ', loc:'Serves AZ + NM',
+      rating:'4.6', reviews:51, response:'~1 day',
+      blurb:'A local SBA broker with deep Tucson lender relationships. Pre-qual is a soft pull; funds route through CoverPanda so your draws stay on your books.',
+      contact:{phone:'(520) •••‑••88', email:'marcus@•••', site:'apexsba.com'},
+      quotes:[{text:'Knew exactly which local lender to take my package to.', who:'Hana L.', unit:'Bright Pickleball Oro Valley #1'}] } },
+
+  insurance:{ key:'insurance', cat:'Insurance', icon:'i-shield', color:'blue',
+    name:'CoverPanda Insurance', logo:'CP', logoBg:'var(--blue)', badge:'req', badgeText:'Required by your FDD',
+    person:'Lena Ruiz', title:'Commercial lines agent', initials:'LR', hue:'205', firm:'CoverPanda Insurance', loc:'Serves Arizona',
+    rating:'4.8', reviews:112, response:'~2 hrs',
+    blurb:"GL, property, and workers' comp written to Bright Pickleball's exact minimums — your COI auto-files to the brand the day you bind, so you clear your compliance check without lifting a finger.",
+    contact:{phone:'(520) •••‑••55', email:'lena@•••', site:'coverpanda.co'},
+    products:[
+      {name:'$2M general liability', note:'Bright Pickleball brand minimum', amount:'$3,800/yr', rec:true},
+      {name:'Property + business interruption', note:'Build-out, contents, lost income', amount:'$4,200/yr', rec:true},
+      {name:"Workers' comp · COI auto-filed", note:'Auto-shared to Bright Pickleball', amount:'$1,400/yr', rec:true},
+      {name:'Cyber + EPLI', note:'Add-on · data + employment practices', amount:'$900/yr', rec:false},
+    ],
+    quotes:[
+      {text:'My COI was on file with the brand the same afternoon I bound the policy.', who:'Lena M.', unit:'Bright Pickleball Tempe #1'},
+      {text:'Wrote it to the FDD minimums exactly — zero compliance flags at opening.', who:'Carlos D.', unit:'Gilbert #2'},
+    ],
+    totalLabel:'Annual premium (est.)', total:'$9,400/yr',
+    alt:{ name:'Marsh Local', logo:'ML', logoBg:'#4a6470', badge:'alt', badgeText:'Marketplace alternative',
+      person:'Joanne Pratt', title:'Commercial insurance broker', initials:'JP', hue:'190', firm:'Marsh Local · Tucson, AZ', loc:'Serves AZ',
+      rating:'4.7', reviews:73, response:'~1 day',
+      blurb:'An independent broker who shops multiple carriers to your FDD minimums. Binds and auto-files your COI to Bright Pickleball through CoverPanda, same as the in-house option.',
+      contact:{phone:'(520) •••‑••21', email:'joanne@•••', site:'marshlocal.com'},
+      quotes:[{text:'Shopped three carriers and still hit the brand minimums on budget.', who:'Ravi P.', unit:'Bright Pickleball Marana #1'}] } },
+
+  payroll:{ key:'payroll', cat:'Payroll', icon:'i-users', color:'violet',
+    name:'CoverPanda Payroll', logo:'CP', logoBg:'var(--violet)', badge:'cp', badgeText:'CoverPanda service',
+    person:'Priya Anand', title:'Payroll onboarding lead', initials:'PA', hue:'280', firm:'CoverPanda Payroll', loc:'Nationwide',
+    rating:'4.8', reviews:88, response:'~3 hrs',
+    blurb:'Run payroll, file taxes, and pay your team before your first shift. Hours pull from your Mindbody POS automatically, so your first run is clean on day one.',
+    contact:{phone:'(520) •••‑••34', email:'priya@•••', site:'coverpanda.co'},
+    products:[
+      {name:'Full-service payroll + tax filing', note:'Federal, state, and local', amount:'$40/mo + $8/ee', rec:true},
+      {name:'POS hours sync (Mindbody)', note:'Hours flow in automatically', amount:'Included', rec:true},
+      {name:'New-hire onboarding & W-2s', note:'I-9, W-4, direct deposit', amount:'Included', rec:true},
+      {name:'401(k) + benefits admin', note:'Add-on · retirement + health', amount:'$8/ee', rec:false},
+    ],
+    quotes:[
+      {text:'First payroll ran clean before opening day. Hours just pulled from the POS.', who:'Aisha B.', unit:'Bright Pickleball Tempe #1'},
+      {text:'Onboarded twelve hires in a weekend — every W-4 and I-9 handled.', who:'Tomás V.', unit:'Chandler #2'},
+    ],
+    totalLabel:'Estimated monthly', total:'from $40/mo + per-employee',
+    alt:{ name:'PayWorks', logo:'PW', logoBg:'#5b5b70', badge:'alt', badgeText:'Marketplace alternative',
+      person:'Eli Brandt', title:'Implementation lead', initials:'EB', hue:'320', firm:'PayWorks · national', loc:'Nationwide',
+      rating:'4.5', reviews:140, response:'~1 day',
+      blurb:'A full payroll platform with a dedicated implementation rep. Connects to your POS and runs taxes; pay schedules and onboarding still flow through your CoverPanda roster.',
+      contact:{phone:'(800) •••‑••19', email:'eli@•••', site:'payworks.com'},
+      quotes:[{text:'Migration off my old provider was painless — rep did most of it.', who:'Dana W.', unit:'Bright Pickleball Mesa #2'}] } },
+
+  accounting:{ key:'accounting', cat:'Accounting & books', icon:'i-chart', color:'green',
+    name:'CoverPanda Accounting', logo:'CP', logoBg:'var(--ink)', badge:'cp', badgeText:'CoverPanda service',
+    person:'Dana Okafor', title:'Bookkeeping & CFO services', initials:'DO', hue:'150', firm:'CoverPanda Accounting', loc:'Serves Arizona · remote',
+    rating:'4.9', reviews:128, response:'~2 hrs',
+    blurb:'Monthly bookkeeping and a royalty-ready P&L on the brand template — your numbers match what HQ sees, automatically, so month-end stops being a fire drill.',
+    contact:{phone:'(520) •••‑••12', email:'dana@•••', site:'coverpanda.co'},
+    products:[
+      {name:'Monthly bookkeeping + reconciliation', note:'Bank, card, and POS', amount:'$300/mo', rec:true},
+      {name:'Royalty-ready P&L (brand template)', note:'Matches what HQ sees', amount:'Included', rec:true},
+      {name:'Year-end tax package', note:'1120-S / K-1s ready', amount:'$900/yr', rec:true},
+      {name:'Quarterly CFO review call', note:'Add-on · benchmarks + planning', amount:'Included w/ tier', rec:false},
+    ],
+    quotes:[
+      {text:'My P&L matches HQ’s to the dollar — no more month-end fire drills.', who:'Rachel S.', unit:'Bright Pickleball Scottsdale #1'},
+      {text:'Royalty true-ups stopped being a headache the first month.', who:'Greg P.', unit:'Mesa #1'},
+    ],
+    totalLabel:'Estimated monthly', total:'$390/mo',
+    alt:{ name:'Hatch CPA Group', logo:'HC', logoBg:'#4a704f', badge:'alt', badgeText:'Marketplace alternative',
+      person:'Nadia Fuentes', title:'CPA · franchise practice', initials:'NF', hue:'160', firm:'Hatch CPA Group · Phoenix, AZ', loc:'Serves AZ',
+      rating:'4.8', reviews:59, response:'~1 day',
+      blurb:'A CPA firm that keeps your books on the brand chart of accounts and signs your returns. Reports flow into CoverPanda, so HQ still sees a royalty-ready P&L.',
+      contact:{phone:'(602) •••‑••76', email:'nadia@•••', site:'hatchcpa.com'},
+      quotes:[{text:'Wanted a credentialed CPA on the books and the P&L still rolled up clean.', who:'Owen D.', unit:'Bright Pickleball Gilbert #1'}] } },
+};
+
+/* resolve a vendor "view": the CoverPanda primary or its marketplace alternative */
+function vendorView(svc, id){
+  const v=VENDORS[svc];
+  if(id==='alt'){ return Object.assign({}, v, v.alt, {recommended:false, recName:v.name}); }
+  return Object.assign({}, v, {recommended:true, recName:v.name});
+}
+
+/* ---------- the roadmap (modeled on the live Swig onboarding template) ---------- */
+const STATE = {
+  tab:'roadmap',
+  showWelcome:true,
+  // each entry: null  OR  {id:'cp'|'alt', name, who, status:'requested'|'engaged'}
+  roster:{ accounting:null, formation:null, lending:null, insurance:null, payroll:null },
+  phases:[
+    { id:'p1', t:'Kickoff & entity setup', icon:'i-flag', color:'green', wk:'Weeks 1–3', open:true, tasks:[
+      { t:'Review & sign your Franchise Agreement', d:'Signed with your attorney; legally binds the deal.', type:'done', done:true },
+      { t:'Pay the initial franchise fee', d:'Collected on CoverPanda Payments — receipt filed.', type:'done', done:true },
+      { t:'File your entity & EIN, open a business bank account', d:'Form the LLC that signs your lease and holds your accounts.', type:'up', svc:'formation' },
+      { t:'Secure financing — line of credit + build-out funding', d:'$25K operating minimum; $200K–$650K buildout by venue type.', type:'up', svc:'lending' },
+      { t:'Bind required insurance to brand spec', d:'GL, property, and workers’ comp; COI shared to Bright Pickleball.', type:'up', svc:'insurance' },
+    ]},
+    { id:'p2', t:'Site selection & approval', icon:'i-store', color:'blue', wk:'Weeks 2–10', tasks:[
+      { t:'Territory review & site shortlist', d:'Confirm your protected territory and scout sites.', type:'opt' },
+      { t:'Submit your site package for brand approval', d:'Brand reviews demographics, visibility, and co-tenancy.', type:'up' },
+      { t:'Negotiate the LOI with your landlord', d:'Letter of intent before the lease.', type:'up' },
+    ]},
+    { id:'p3', t:'Lease negotiation & signing', icon:'i-doc', color:'amber', wk:'Weeks 6–14', tasks:[
+      { t:'Sign the landlord consent & lease rider', d:'Required exhibits to your lease.', type:'up' },
+      { t:'Execute the final lease', d:'Starts your construction clock.', type:'up' },
+    ]},
+    { id:'p4', t:'Design & build-out', icon:'i-hammer', color:'violet', wk:'Weeks 12–22', tasks:[
+      { t:'Create the initial layout → brand + landlord approval', d:'To brand design specs and your site conditions.', type:'up' },
+      { t:'Pull permits & complete construction', d:'Permit drawings, city submission, build, certificate of occupancy.', type:'up' },
+    ]},
+    { id:'p5', t:'Vendors & technology', icon:'i-chart', color:'green', wk:'Weeks 16–22', tasks:[
+      { t:'Install your POS & tech stack', d:'Mindbody POS, court booking, retail.', type:'up' },
+      { t:'Set up payroll & HR before your first hire', d:'Accounts, pay cards, and onboarding docs ready day one.', type:'up', svc:'payroll' },
+      { t:'Turn on bookkeeping for the unit', d:'Categorize every build and operating cost from the start.', type:'up', svc:'accounting' },
+    ]},
+    { id:'p6', t:'Hiring & training', icon:'i-users', color:'blue', wk:'Weeks 18–24', tasks:[
+      { t:'Hire your GM & leadership', d:'Post, interview, and onboard your management.', type:'up' },
+      { t:'Complete brand training & a hiring event', d:'Certify your team on the Bright Pickleball system.', type:'up' },
+    ]},
+    { id:'p7', t:'Pre-opening marketing', icon:'i-megaphone', color:'amber', wk:'Weeks 20–26', tasks:[
+      { t:'Launch your local marketing plan → brand approval', d:'Social, community, and grand-opening buildup.', type:'up' },
+      { t:'Seed your loyalty / pre-sale list', d:'Drive first-week demand before the doors open.', type:'opt' },
+    ]},
+    { id:'p8', t:'Soft opening', icon:'i-flag', color:'green', wk:'Week 25', tasks:[
+      { t:'Run your soft-open program & hit team benchmarks', d:'Limited hours; work out the kinks.', type:'up' },
+    ]},
+    { id:'p9', t:'Grand opening', icon:'i-rocket', color:'ember', wk:'Week 26', tasks:[
+      { t:'Grand-opening event & final brand approval to open', d:'The launch — and your last compliance check.', type:'up' },
+    ]},
+    { id:'p10', t:'Open & operating', icon:'i-chart', color:'green', wk:'Ongoing', tasks:[
+      { t:'Weekly royalty & brand-fund collection', d:'Automated from your connected accounts.', type:'opt' },
+      { t:'Monthly P&L and reports to you + the brand', d:'Royalty-ready, on the brand template.', type:'up', svc:'accounting' },
+      { t:'Keep insurance & compliance current', d:'COI renewals tracked; brand audits passed.', type:'up', svc:'insurance' },
+    ]},
+  ],
+};
+const COLORS={green:['var(--green)','var(--green-soft)'],blue:['var(--blue)','var(--blue-soft)'],amber:['var(--amber)','var(--amber-soft)'],violet:['var(--violet)','var(--violet-soft)'],ember:['var(--ember)','var(--ember-soft)']};
+
+/* ---------- progress ---------- */
+function allTasks(){ return STATE.phases.flatMap(p=>p.tasks); }
+function phaseDone(p){ return p.tasks.filter(t=>t.done).length; }
+function overallPct(){ const all=allTasks(); return Math.round(all.filter(t=>t.done).length/all.length*100); }
+function rosterCount(status){ return Object.values(STATE.roster).filter(r=>r&&r.status===status).length; }
+
+/* ---------- render ---------- */
+function rerender(){
+  $id('tbPct').textContent = overallPct()+'%';
+  const inNet = Object.values(STATE.roster).filter(Boolean).length;
+  $id('tabs').innerHTML = [
+    ['roadmap','i-flag','Roadmap',''],
+    ['vendors','i-store','Vendors', inNet?`<span class="badge" style="background:var(--green)">${inNet}</span>`:''],
+    ['documents','i-doc','Documents',''],
+    ['messages','i-spark','Messages',''],
+  ].map(([k,icn,l,b])=>`<button class="${STATE.tab===k?'on':''}" ${(k==='documents'||k==='messages')?'disabled':''} onclick="STATE.tab='${k}';rerender()">${ic(icn,'ic--s')} ${l} ${b}</button>`).join('');
+  $id('wrap').innerHTML = STATE.tab==='vendors' ? renderVendors() : renderRoadmap();
+}
+
+function renderRoadmap(){
+  const welcome = STATE.showWelcome ? `
+    <div class="welcome">
+      <div class="wic"><svg width="22" height="22" viewBox="0 0 26 26"><use href="#i-panda"/></svg></div>
+      <div><h1>Welcome, Maya — let's open Tucson #1.</h1>
+        <p>Bright Pickleball invited you to your onboarding portal. Work the phases below from signing to grand opening. At each step that needs a pro — forming your entity, financing, insurance, payroll, books — I'll introduce a vetted, brand-approved vendor and pre-fill the request, so you never start from a blank page.</p></div>
+      <button class="wx" onclick="STATE.showWelcome=false;rerender()">${ic('i-x','ic--s')}</button>
+    </div>` : '';
+  const phases = STATE.phases.map(p=>{
+    const [c1,c2]=COLORS[p.color];
+    const dn=phaseDone(p), tot=p.tasks.length, pct=Math.round(dn/tot*100);
+    const tasks = p.tasks.map((t,ti)=>taskRow(p,ti,t)).join('');
+    return `<div class="phase ${p.open?'open':''}" style="--nc:${c1};--ncs:${c2}">
+      <div class="ph-head" onclick="togglePhase('${p.id}')">
+        <div class="ph-ic">${ic(p.icon,'ic--s')}</div>
+        <div><div class="ph-t">${p.t}</div><div class="ph-meta">${dn} of ${tot} done${p.tasks.some(t=>t.svc)?' · vendor help available':''}</div></div>
+        <div class="ph-prog"><span class="ph-wk">${p.wk}</span><div class="ph-bar"><div style="width:${pct}%"></div></div><span class="ph-pct">${pct}%</span><svg class="ic ph-chev"><use href="#i-chev"/></svg></div>
+      </div>
+      <div class="ph-body">${tasks}</div>
+    </div>`;
+  }).join('');
+  return welcome + `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px"><span class="seclab">Your launch roadmap · 10 phases</span><span style="font-size:12px;color:var(--muted)">${allTasks().filter(t=>t.done).length} of ${allTasks().length} tasks · projected open <b style="color:var(--ink)">Aug 21</b></span></div>` + phases;
+}
+
+function taskRow(p,ti,t){
+  let actPill;
+  if(t.done) actPill = `<span class="pill done">${ic('i-check','ic--s')} Done</span>`;
+  else if(t.type==='up') actPill = `<span class="pill up">Upload</span>`;
+  else if(t.type==='opt') actPill = `<span class="pill opt">Optional</span>`;
+  else actPill='';
+  const vcard = t.svc ? vendorConnect(p,ti,t) : '';
+  return `<div class="task ${t.done?'done':''}">
+      <div class="tk" onclick="toggleTask('${p.id}',${ti})">${ic('i-check','ic--s')}</div>
+      <div style="flex:1;min-width:0"><div class="tt">${t.t}</div><div class="td">${t.d}</div>${vcard}</div>
+      <div class="tact">${actPill}</div>
+    </div>`;
+}
+
+/* the inline "meet a pro" moment at a service step — 3 states */
+function vendorConnect(p,ti,t){
+  const r=STATE.roster[t.svc];
+  const v=vendorView(t.svc, r? r.id : 'cp');
+  if(r && r.status==='engaged'){
+    return `<div class="vconnect engaged">
+      <div class="vc-row" style="margin-top:0;background:transparent;box-shadow:none;padding:0">
+        ${avatar(v.hue,v.initials,34,true)}
+        <div style="flex:1;min-width:0"><div class="vc-name">${r.name} <span class="vbadge cp">${ic('i-check','ic--s')} On your team</span></div><div class="vc-meta">${r.who} is handling this step · in your Vendors</div></div>
+        <button class="btn btn--ghost btn--sm" onclick="openVendor('${t.svc}')">View</button>
+      </div></div>`;
+  }
+  if(r && r.status==='requested'){
+    return `<div class="vconnect requested">
+      <div class="vc-row" style="margin-top:0;background:transparent;box-shadow:none;padding:0">
+        ${avatar(v.hue,v.initials,34,false)}
+        <div style="flex:1;min-width:0"><div class="vc-name">${r.name} <span class="vbadge wait">${ic('i-clock','ic--s')} Proposal incoming</span></div><div class="vc-meta">${r.who} has your request · replies ${v.response}</div></div>
+        <button class="btn btn--dark btn--sm" onclick="openVendor('${t.svc}',{step:'proposal'})">View proposal ${ic('i-arrow','ic--s')}</button>
+      </div></div>`;
+  }
+  return `<div class="vconnect">
+    <div class="vc-top"><div class="vc-pa"><svg width="16" height="16" viewBox="0 0 26 26"><use href="#i-panda"/></svg></div>
+      <div><div class="vc-lead">Need a hand with this? Meet your pro.</div><div class="vc-sub">${p.t==='Kickoff & entity setup'?'I lined up Bright Pickleball’s recommended pro for this step:':'Bright Pickleball’s recommended pro for this step:'}</div></div></div>
+    <div class="vc-row">
+      ${avatar(v.hue,v.initials,38,false)}
+      <div style="flex:1;min-width:0"><div class="vc-name">${v.name} <span class="vbadge ${v.badge}">${v.badgeText}</span></div><div class="vc-meta">${v.person} · ★ ${v.rating} (${v.reviews}) · replies ${v.response}</div></div>
+      <button class="btn btn--dark btn--sm" onclick="openVendor('${t.svc}')">View &amp; request ${ic('i-arrow','ic--s')}</button>
+    </div>
+    <div class="vc-alt">Prefer your own? <a onclick="openVendor('${t.svc}',{id:'alt'})">Compare ${v.alt.name} →</a></div>
+  </div>`;
+}
+
+/* ---------- vendors tab (the roster / stack) ---------- */
+function catNeed(c){ return ({accounting:'Bookkeeping, royalty-ready P&L, tax',formation:'Entity, EIN, DBA, registered agent',lending:'Build-out + operating financing',insurance:'GL, property, workers’ comp',payroll:'Payroll, tax filing, HR'})[c]; }
+function renderVendors(){
+  const cats=['accounting','formation','lending','insurance','payroll'];
+  const connected=rosterCount('engaged'), requested=rosterCount('requested');
+  const cards = cats.map(c=>{
+    const r=STATE.roster[c];
+    const v=vendorView(c, r? r.id : 'cp'); const [c1,c2]=COLORS[VENDORS[c].color];
+    let body, cls='';
+    if(r && r.status==='engaged'){ cls='connected';
+      body=`<div class="rc-vendor">${avatar(v.hue,v.initials,30,true)}
+          <div style="flex:1;min-width:0"><div class="rc-vn">${r.name}</div><div class="rc-vs ok">${ic('i-check','ic--s')} ${r.who} · active</div></div>
+          <button class="btn btn--ghost btn--sm" onclick="openVendor('${c}')">Manage</button></div>`;
+    } else if(r && r.status==='requested'){ cls='requested';
+      body=`<div class="rc-vendor">${avatar(v.hue,v.initials,30,false)}
+          <div style="flex:1;min-width:0"><div class="rc-vn">${r.name}</div><div class="rc-vs wait">${ic('i-clock','ic--s')} ${r.who} · proposal incoming</div></div>
+          <button class="btn btn--dark btn--sm" onclick="openVendor('${c}',{step:'proposal'})">View</button></div>`;
+    } else {
+      body=`<div class="rc-empty"><div style="flex:1;font-size:12px;color:var(--muted)">Not connected yet — add when you reach this step, or now.</div>
+          <button class="btn btn--dark btn--sm" onclick="openVendor('${c}')">Connect ${ic('i-arrow','ic--s')}</button></div>`;
+    }
+    return `<div class="rcard ${cls}" style="--nc:${c1};--ncs:${c2}">
+      <div class="rc-head"><div class="rc-ic">${ic(VENDORS[c].icon,'ic--s')}</div><div><div class="rc-cat">${VENDORS[c].cat}</div><div class="rc-need">${catNeed(c)}</div></div></div>
+      ${body}
+    </div>`;
+  }).join('');
+  return `<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:4px">
+      <div><span class="seclab">Your vendor network</span>
+        <h1 style="font-family:var(--display);font-weight:500;font-size:24px;color:var(--ink);margin-top:7px">Your vendors &amp; connections</h1>
+        <div style="font-size:13px;color:var(--muted);margin-top:3px">Everyone helping you open Tucson #1, in one roster. <b style="color:var(--ink)">${connected} of 5</b> connected${requested?` · ${requested} proposal${requested>1?'s':''} in progress`:''}.</div></div>
+    </div>
+    <div class="roster">${cards}</div>
+    <div class="note" style="margin-top:18px">🐼 Bright Pickleball pre-approved these for your category. You can swap in your own at any step — whoever you pick, agreements and payments run here, so this roster stays your single source of truth.</div>`;
+}
+
+/* ---------- the marketplace engagement drawer (profile → tailor → review → proposal → connect) ---------- */
+let DRAWER=null; // {svc, id, step, sel:{idx:bool}, ctx:idx, note}
+const CTX = {
+  formation:{ q:'Entity type', opts:['Single-member LLC','Multi-member LLC','S-corp election'], def:0 },
+  lending:{ q:'Build-out funding needed', opts:['$200K–$350K','$350K–$500K','$500K–$650K'], def:1 },
+  insurance:{ q:'Coverage tier', opts:['Brand minimum ($2M GL)','Enhanced ($3M GL)','Umbrella +'], def:0 },
+  payroll:{ q:'Team size at open', opts:['1–10','11–25','26+'], def:1 },
+  accounting:{ q:'Bookkeeping cadence', opts:['Monthly','Bi-weekly','Weekly'], def:0 },
+};
+function defaultSel(v){ const s={}; v.products.forEach((p,i)=>{ if(p.rec) s[i]=true; }); return s; }
+function selectedProducts(v){ return v.products.filter((p,i)=>DRAWER.sel[i]); }
+
+function openVendor(svc, opts){
+  opts=opts||{}; const r=STATE.roster[svc];
+  const id = opts.id || (r? r.id : 'cp');
+  let step = opts.step || (r ? (r.status==='engaged'?'engaged':'sent') : 'profile');
+  const v=vendorView(svc, id);
+  DRAWER={ svc, id, step, sel:defaultSel(v), ctx:CTX[svc].def, note:'' };
+  renderDrawer();
+  $id('scrim').classList.add('on'); $id('drawer').classList.add('on');
+}
+function closeDrawer(){ $id('scrim').classList.remove('on'); $id('drawer').classList.remove('on'); }
+function goStep(step){ DRAWER.step=step; renderDrawer(); }
+
+function stepper(phase){
+  const idx={request:0,proposal:1,connected:2}[phase];
+  const labels=['Request','Proposal','Connected'];
+  return `<div class="stepper">`+labels.map((l,i)=>{
+    const cls=i<idx?'done':(i===idx?'on':'');
+    const inner=i<idx?ic('i-check','ic--s'):(i+1);
+    return `<div class="stp ${cls}"><div class="sd">${inner}</div><div class="sl">${l}</div></div>`+(i<2?`<div class="stp-ln"></div>`:'');
+  }).join('')+`</div>`;
+}
+
+function renderDrawer(){
+  const {svc,id,step}=DRAWER; const v=vendorView(svc,id);
+  const backMap={ tailor:'profile', review:'tailor' };
+  const labelMap={ profile:`${v.cat} · CoverPanda marketplace`, tailor:'Step 1 of 2 · Tailor your request', review:'Step 2 of 2 · Review & send', sent:'Request sent', proposal:'Your proposal', engaged:'Connected & active' };
+  let body='', foot='';
+
+  if(step==='profile'){
+    body = stepper('request') + `
+      <div class="prof-hero">${avatar(v.hue,v.initials,56,v.recommended)}
+        <div style="flex:1;min-width:0">
+          <div class="prof-name">${v.person}</div>
+          <div class="prof-title">${v.title} · ${v.firm}</div>
+          <div class="prof-stats"><span class="st">★ ${v.rating}</span><span class="dot">·</span> ${v.reviews} reviews <span class="dot">·</span> ${ic('i-clock','ic--s')} replies ${v.response}</div>
+        </div></div>
+      ${v.recommended
+        ? `<div class="ribbon ok">${ic('i-check','ic--s')} Bright Pickleball–approved for this step</div>`
+        : `<div class="ribbon alt">Marketplace alternative · Bright Pickleball recommends <b>&nbsp;${v.recName}</b></div>`}
+      <p class="prof-blurb">${v.blurb}</p>
+      <div class="seclab" style="margin:18px 0 9px">What ${firstName(v.person)} handles for this step</div>
+      ${v.products.map(p=>`<div class="prodview"><div class="pv-ic">${ic('i-check','ic--s')}</div><div><div class="pv-n">${p.name}</div><div class="pv-d">${p.note}</div></div></div>`).join('')}
+      <div class="seclab" style="margin:18px 0 9px">What other franchisees say</div>
+      ${v.quotes.map(q=>`<div class="quote"><div class="qstars">★★★★★</div><p>“${q.text}”</p><div class="qa">${q.who} · ${q.unit}</div></div>`).join('')}
+      <div class="seclab" style="margin:18px 0 9px">Contact</div>
+      <div class="contact">
+        <div class="crow">${ic('i-phone','ic--s')} ${v.contact.phone}</div>
+        <div class="crow">${ic('i-mail','ic--s')} ${v.contact.email}</div>
+        <div class="crow" style="border-bottom:0">${ic('i-globe','ic--s')} ${v.contact.site}</div>
+        <div class="locknote">${ic('i-lock','ic--s')} Full contact details unlock once you connect — your info stays private until you choose to share it.</div>
+      </div>`;
+    foot = `<button class="mlink" onclick="openVendor('${svc}',{id:'${v.recommended?'alt':'cp'}'})">${v.recommended?`Compare ${v.alt.name}`:`See ${v.recName}`}</button>
+      <span style="flex:1"></span>
+      <button class="btn btn--green btn--lg" onclick="goStep('tailor')">Request intro & proposal ${ic('i-arrow','ic--s')}</button>`;
+  }
+
+  else if(step==='tailor'){
+    body = stepper('request') + `
+      <div class="dstep-h">Tell ${firstName(v.person)} what you need</div>
+      <div class="dstep-s">Pre-filled from your unit (Tucson #1) and Bright Pickleball’s terms. Toggle anything off, or add an extra.</div>
+      ${v.products.map((p,i)=>`<div class="prod ${DRAWER.sel[i]?'on':''}" onclick="DRAWER.sel[${i}]=!DRAWER.sel[${i}];renderDrawer()">
+        <div class="cbox">${ic('i-check','ic--s')}</div>
+        <div style="flex:1"><div class="pn">${p.name}${p.rec?'':' <span style="font-weight:600;color:var(--muted2);font-size:11px">· add-on</span>'}</div><div class="pd">${p.note}</div></div>
+        <div class="pa">${p.amount}</div></div>`).join('')}
+      <div class="seclab" style="margin:16px 0 0">${CTX[svc].q}</div>
+      <div class="chips">${CTX[svc].opts.map((o,i)=>`<button class="chip ${DRAWER.ctx===i?'on':''}" onclick="DRAWER.ctx=${i};renderDrawer()">${o}</button>`).join('')}</div>
+      <div class="seclab" style="margin:14px 0 0">Anything to add? <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted2)">(optional)</span></div>
+      <textarea class="ta" placeholder="e.g., I'm aiming to sign my lease in the next 30 days…" oninput="DRAWER.note=this.value">${DRAWER.note}</textarea>`;
+    foot = `<button class="btn btn--ghost" onclick="goStep('profile')">Back</button><span style="flex:1"></span>
+      <button class="btn btn--dark btn--lg" onclick="goStep('review')">Review request ${ic('i-arrow','ic--s')}</button>`;
+  }
+
+  else if(step==='review'){
+    const sel=selectedProducts(v);
+    body = stepper('request') + `
+      <div class="dstep-h">Review your request</div>
+      <div class="dstep-s">This is exactly what ${firstName(v.person)} receives — nothing sent until you hit send.</div>
+      <div class="reqcard">
+        <div class="rq-row"><span>To</span><b>${v.person} · ${v.firm}</b></div>
+        <div class="rq-row"><span>From</span><b>Maya Chen · Tucson #1</b></div>
+        <div class="rq-row top"><span>Requesting</span><div>${sel.length?sel.map(p=>`<div class="rq-li">${ic('i-check','ic--s')} ${p.name}</div>`).join(''):'<span style="color:var(--muted2)">No items selected</span>'}</div></div>
+        <div class="rq-row"><span>${CTX[svc].q}</span><b>${CTX[svc].opts[DRAWER.ctx]}</b></div>
+        ${DRAWER.note?`<div class="rq-row top"><span>Note</span><div style="font-weight:500">${DRAWER.note}</div></div>`:''}
+      </div>
+      <div class="seclab" style="margin-bottom:9px">Attached automatically</div>
+      <div class="attach">${ic('i-store','ic--s')} Your unit profile — Bright Pickleball Tucson #1</div>
+      <div class="attach">${ic('i-doc','ic--s')} Bright Pickleball brand terms</div>
+      ${svc==='insurance'?`<div class="attach">${ic('i-shield','ic--s')} FDD insurance minimums ($2M GL)</div>`:''}
+      <div class="note">🐼 Because this rides the marketplace, ${firstName(v.person)} gets your details and brand terms instantly — so you get a pre-filled proposal back, not a blank intake form.</div>`;
+    foot = `<button class="btn btn--ghost" onclick="goStep('tailor')">Back</button><span style="flex:1"></span>
+      <button class="btn btn--green btn--lg" ${sel.length?'':'disabled style="opacity:.5"'} onclick="requestVendor()">Send request to ${firstName(v.person)} ${ic('i-arrow','ic--s')}</button>`;
+  }
+
+  else if(step==='sent'){
+    body = stepper('proposal') + `
+      <div class="sent-ok">${ic('i-check')}</div>
+      <div class="dstep-h" style="text-align:center">Request sent to ${firstName(v.person)}</div>
+      <div class="dstep-s" style="text-align:center;max-width:340px;margin:6px auto 0">${v.person} now has your unit details and Bright Pickleball’s terms. You’ll get a pre-filled proposal back — usually within ${v.response.replace('~','about ')}.</div>
+      <div class="lifecycle">
+        <span class="lc done">${ic('i-check','ic--s')} Requested</span><span class="lc-ar">${ic('i-arrow','ic--s')}</span>
+        <span class="lc now">Proposal</span><span class="lc-ar">${ic('i-arrow','ic--s')}</span>
+        <span class="lc next">Sign &amp; kick off</span>
+      </div>
+      <div class="note">Added to your Vendors as <b>“Requested.”</b> Keep working your roadmap — I’ll ping you the moment the proposal lands.</div>`;
+    foot = `<button class="btn btn--ghost" onclick="closeDrawer()">Back to roadmap</button><span style="flex:1"></span>
+      <button class="btn btn--dark btn--lg" onclick="goStep('proposal')">Preview the proposal ${ic('i-arrow','ic--s')}</button>`;
+  }
+
+  else if(step==='proposal'){
+    const sel=selectedProducts(v); const lines=sel.length?sel:v.products.filter(p=>p.rec);
+    body = stepper('proposal') + `
+      <div class="dstep-h">${firstName(v.person)} sent your proposal</div>
+      <div class="dstep-s">Pre-filled to Tucson #1 and your brand terms. Review, then sign &amp; pay — all right here.</div>
+      <div class="proposal">
+        <div class="prop-head" style="background:${v.logoBg}">
+          <div class="vc-logo" style="width:30px;height:30px;background:rgba(255,255,255,.16)">${v.logo}</div>
+          <div><div class="prop-ht">${v.name} — ${v.cat}</div><div class="prop-hs">Prepared for Maya Chen · Tucson #1</div></div>
+        </div>
+        <div class="prop-body">
+          ${lines.map(p=>`<div class="prop-line"><div><div class="pl-n">${p.name}</div><div class="pl-d">${p.note}</div></div><div class="pl-a">${p.amount}</div></div>`).join('')}
+          <div class="prop-total"><span>${v.totalLabel}</span><b>${v.total}</b></div>
+          <div class="prop-fine">Sample estimate · finalized with you before anything is charged. Sign &amp; pay on CoverPanda’s rails — agreement and payment stay in your portal.</div>
+        </div>
+      </div>
+      <div class="note">🐼 Brand terms are already baked in${svc==='insurance'?' — written to your FDD minimums':''}. Accept and ${firstName(v.person)} joins your team; this step checks off your roadmap automatically.</div>`;
+    foot = `<button class="mlink" onclick="toast('Messaging opens in the full app')">Message ${firstName(v.person)}</button><span style="flex:1"></span>
+      <button class="btn btn--green btn--lg" onclick="engageVendor()">Accept &amp; connect ${firstName(v.person)} ${ic('i-arrow','ic--s')}</button>`;
+  }
+
+  else if(step==='engaged'){
+    const r=STATE.roster[svc];
+    body = stepper('connected') + `
+      <div class="prof-hero">${avatar(v.hue,v.initials,56,true)}
+        <div style="flex:1;min-width:0"><div class="prof-name">${v.person}</div>
+          <div class="prof-title">${v.title} · ${v.firm}</div>
+          <div class="prof-stats"><span class="st">★ ${v.rating}</span><span class="dot">·</span> replies ${v.response}</div></div></div>
+      <div class="ribbon ok">${ic('i-check','ic--s')} Connected &amp; active · handling your ${v.cat.toLowerCase()}</div>
+      <div class="seclab" style="margin:14px 0 9px">What ${firstName(v.person)} is handling</div>
+      ${(selectedProducts(v).length?selectedProducts(v):v.products.filter(p=>p.rec)).map(p=>`<div class="prodview"><div class="pv-ic">${ic('i-check','ic--s')}</div><div><div class="pv-n">${p.name}</div><div class="pv-d">${p.note}</div></div></div>`).join('')}
+      <div class="note">Agreements and payments run here, so this stays in your Vendors roster as your single source of truth. Need a change? Message ${firstName(v.person)} any time.</div>`;
+    foot = `<button class="mlink" onclick="toast('Messaging opens in the full app')">${ic('i-msg','ic--s')} Message ${firstName(v.person)}</button><span style="flex:1"></span>
+      <button class="btn btn--ghost" onclick="closeDrawer()">Done</button>`;
+  }
+
+  $id('drawer').innerHTML = `
+    <div class="dhead">
+      ${backMap[step]?`<button class="dback" onclick="goStep('${backMap[step]}')">${ic('i-chev')}</button>`:''}
+      <div class="dh-id"><div class="dh-t">${v.name}</div><div class="dh-s">${labelMap[step]}</div></div>
+      <div class="x" onclick="closeDrawer()">${ic('i-x')}</div>
+    </div>
+    <div class="dbody">${body}</div>
+    <div class="dfoot">${foot}</div>`;
+}
+
+function requestVendor(){
+  const {svc,id}=DRAWER; const v=vendorView(svc,id);
+  STATE.roster[svc]={ id, name:v.name, who:v.person, status:'requested' };
+  DRAWER.step='sent'; renderDrawer(); rerender();
+  toast(`Request sent to ${v.person}`);
+}
+function engageVendor(){
+  const {svc,id}=DRAWER; const v=vendorView(svc,id);
+  STATE.roster[svc]={ id, name:v.name, who:v.person, status:'engaged' };
+  STATE.phases.forEach(p=>p.tasks.forEach(t=>{ if(t.svc===svc) t.done=true; }));
+  DRAWER.step='engaged'; renderDrawer(); rerender();
+  toast(`${v.person} is on your team 🎉`);
+}
+
+/* ---------- interactions ---------- */
+function togglePhase(id){ const p=STATE.phases.find(x=>x.id===id); p.open=!p.open; rerender(); }
+function toggleTask(pid,ti){ const t=STATE.phases.find(p=>p.id===pid).tasks[ti]; t.done=!t.done; rerender(); }
+
+rerender();
+</script>
+</body>
+</html>
