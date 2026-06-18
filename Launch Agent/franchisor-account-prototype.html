@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CoverPanda — Workspace Account & Billing (Rally &amp; Roam)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="../journey-nav.js"></script>
+<style>
+  :root{
+    --bg:#fbfaf8;--panel:#f6f4f0;--stone:#efece6;--border:#e8e4dc;--border2:#ddd7cd;--card:#fff;
+    --ink:#131210;--ink-soft:#36342f;--body:#4a4842;--muted:#6e6b63;--muted2:#8a867c;
+    --ember:#ff3e00;--ember-soft:#ffece4;--ember-deep:#c93100;--green:#00a843;--green-soft:#e3f6ea;--green-deep:#00702e;
+    --blue:#0084ec;--blue-soft:#e6f2fd;--violet:#6e56e8;--violet-soft:#efecfd;--amber:#a87a08;--amber-soft:#faf2dd;--red:#d4351c;--red-soft:#fbe9e6;
+    --font:'Instrument Sans',-apple-system,sans-serif;--display:'Fraunces',Georgia,serif;--mono:'Spline Sans Mono',ui-monospace,monospace;
+    --inset2:#e8e4dc 0 0 0 1px inset;--pop:0 1px 2px rgba(19,18,16,.05),0 12px 34px rgba(19,18,16,.12);--pop-lg:0 2px 6px rgba(19,18,16,.07),0 24px 64px rgba(19,18,16,.16);
+    --spring:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--body);-webkit-font-smoothing:antialiased;letter-spacing:-.008em;font-size:14px;min-height:100vh}
+  .ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .ic--s{width:13px;height:13px}.ic--l{width:20px;height:20px}
+
+  .topbar{position:sticky;top:0;z-index:60;background:var(--card);border-bottom:1px solid var(--border);padding:0 26px}
+  .tb-row{display:flex;align-items:center;gap:13px;height:58px;max-width:1000px;margin:0 auto}
+  .tb-logo{width:30px;height:30px;border-radius:9px;background:var(--ink);display:grid;place-items:center;flex:none}
+  .tb-brand{font-size:14.5px;font-weight:700;color:var(--ink)}
+  .tb-sub{font-size:11.5px;color:var(--muted)}
+  .tb-av{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+  .tabs{display:flex;gap:2px;max-width:1000px;margin:0 auto;overflow-x:auto}
+  .tabs button{background:none;border:0;font-family:var(--font);font-size:13px;font-weight:600;color:var(--muted);padding:11px 14px;cursor:pointer;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+  .tabs button.on{color:var(--ink);border-bottom-color:var(--ink)}
+  .tabs button:hover:not(.on){color:var(--ink-soft)}
+
+  .wrap{max-width:1000px;margin:0 auto;padding:26px 26px 90px}
+  .seclab{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2)}
+  h1.pg{font-family:var(--display);font-weight:500;font-size:25px;color:var(--ink);margin-top:7px}
+  .pgsub{font-size:13px;color:var(--muted);margin-top:3px}
+
+  .card{background:var(--card);border-radius:16px;box-shadow:var(--inset2);padding:20px 22px;margin-bottom:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr}}
+
+  .plan-head{display:flex;align-items:flex-start;gap:14px}
+  .plan-badge{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:99px;padding:4px 10px;background:var(--violet-soft);color:var(--violet)}
+  .price{font-family:var(--display);font-size:30px;color:var(--ink);font-weight:500}
+  .price span{font-size:14px;color:var(--muted);font-family:var(--font)}
+  .feat{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--body);padding:5px 0}
+  .feat .ic{color:var(--green);margin-top:2px}
+
+  .billrow{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;padding:11px 0;border-bottom:1px solid #f4f1ec}
+  .billrow:last-child{border-bottom:0}
+  .billrow .bl{color:var(--ink)}
+  .billrow .bs{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .billrow .bv{font-family:var(--mono);font-weight:600;color:var(--ink);white-space:nowrap}
+  .billtot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:13px;border-top:1.5px solid var(--border)}
+  .billtot .bv{font-family:var(--display);font-size:22px;color:var(--ink)}
+
+  .pm{display:flex;align-items:center;gap:12px;background:var(--panel);border-radius:12px;padding:13px 15px}
+  .pm .cardicon{width:38px;height:26px;border-radius:6px;background:linear-gradient(135deg,#3a3a6a,#1d1d3a);flex:none}
+
+  .invoice{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid #f4f1ec}
+  .invoice:last-child{border-bottom:0}
+  .invoice .ii{width:34px;height:34px;border-radius:10px;background:var(--panel);color:var(--muted);display:grid;place-items:center;flex:none}
+
+  .member{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #f4f1ec}
+  .member:last-child{border-bottom:0}
+  .member .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;flex:none}
+  .rolepill{font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 9px;background:var(--stone);color:var(--ink-soft)}
+
+  .usage-big{font-family:var(--display);font-size:34px;color:var(--ink);font-weight:500}
+  .usage-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .meter{height:8px;border-radius:99px;background:var(--panel);overflow:hidden;margin-top:12px}
+  .meter>div{height:100%;background:var(--blue);border-radius:99px}
+
+  .empty{text-align:center;padding:34px 20px;color:var(--muted)}
+  .empty .ei{width:46px;height:46px;border-radius:13px;background:var(--panel);color:var(--muted2);display:grid;place-items:center;margin:0 auto 12px}
+
+  .danger{box-shadow:0 0 0 1px var(--red-soft) inset;background:#fffaf9}
+
+  /* gate */
+  .gate{position:fixed;inset:0;z-index:500;background:radial-gradient(130% 90% at 50% -20%, #fff, var(--bg));display:grid;place-items:center;padding:24px}
+  .gate-card{max-width:400px;text-align:center;animation:rise .5s var(--spring)}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .gate-logo{width:54px;height:54px;border-radius:15px;background:var(--ink);display:grid;place-items:center;margin:0 auto 16px}
+  .gate-card h1{font-family:var(--display);font-weight:500;font-size:25px;color:var(--ink);margin:6px 0 4px}
+  .gate-card p{font-size:13.5px;color:var(--muted);line-height:1.55}
+  .form{background:var(--card);box-shadow:var(--inset2);border-radius:14px;padding:16px;text-align:left;margin:18px 0}
+  .field label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .input{width:100%;border:0;background:var(--panel);border-radius:10px;padding:11px 13px;font-family:var(--font);font-size:13.5px;color:var(--ink)}
+  .input:focus{outline:none;box-shadow:0 0 0 1.5px var(--ink) inset}
+
+  /* modal */
+  .scrim{position:fixed;inset:0;background:rgba(19,18,16,.34);backdrop-filter:blur(2px);z-index:320;opacity:0;pointer-events:none;transition:opacity .2s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;z-index:330;width:420px;max-width:94vw;background:var(--bg);border-radius:18px;box-shadow:var(--pop-lg);padding:24px;transition:opacity .2s,transform .2s}
+  .modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .modal h3{font-family:var(--display);font-weight:600;font-size:19px;color:var(--ink)}
+  .modal p{font-size:13px;color:var(--body);line-height:1.55;margin-top:7px}
+
+  .note{font-size:12px;color:var(--muted);line-height:1.55;background:var(--panel);border-radius:12px;padding:12px 14px;margin-top:14px}
+  .note b{color:var(--ink-soft)}
+  .propflag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--amber);background:var(--amber-soft);border-radius:99px;padding:4px 10px;font-weight:600}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font);font-size:13px;font-weight:600;border:0;border-radius:999px;cursor:pointer;padding:9px 15px;transition:transform .1s,background .15s;text-decoration:none;white-space:nowrap}
+  .btn:active{transform:scale(.98)}
+  .btn--dark{background:var(--ink);color:#fff}.btn--dark:hover{background:#2e2c28}
+  .btn--green{background:var(--green);color:#fff}.btn--green:hover{background:#009039}
+  .btn--ghost{background:var(--card);color:var(--ink-soft);box-shadow:var(--inset2)}.btn--ghost:hover{background:var(--panel)}
+  .btn--red{background:var(--red);color:#fff}.btn--red:hover{background:#b82d16}
+  .btn--sm{padding:7px 12px;font-size:12px}.btn--lg{padding:12px 19px;font-size:14px}.btn--block{width:100%}
+  .mlink{color:var(--muted);cursor:pointer;font-size:12px;background:none;border:0;font-family:var(--font)}.mlink:hover{color:var(--ink)}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);z-index:400;background:var(--ink);color:#fff;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:11px;box-shadow:var(--pop-lg);transition:transform .35s var(--spring);max-width:92vw}
+  #toast.on{transform:translateX(-50%) translateY(0)}
+  #toast .ic{color:#7ee2a4}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-panda" viewBox="0 0 26 26"><circle cx="9.7" cy="13.3" r="1.5" fill="#fff" stroke="none"/><circle cx="16.3" cy="13.3" r="1.5" fill="#fff" stroke="none"/><path d="M10.5 17.2c.9 1 3.1 1 4 0" stroke="#fff" stroke-width="1.4" fill="none"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6"/><path d="M4 9v11M20 9v11M8 12v5M12 12v5M16 12v5"/><path d="M2 20h20"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 4.6a3.5 3.5 0 0 1 0 6.8M17.5 14.3c2.4.8 4 2.8 4 5.7"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v-4M12 17V8M17 13v-3"/></symbol>
+  <symbol id="i-store" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M4 9v11h16V9M4 9h16M9 20v-6h6v6"/></symbol>
+  <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 6 9.4l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 6.6V4.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.82 1.17l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+</svg>
+
+<div class="topbar">
+  <div class="tb-row">
+    <span class="tb-logo"><svg width="18" height="18" viewBox="0 0 26 26"><use href="#i-panda"/></svg></span>
+    <div><div class="tb-brand">Rally &amp; Roam</div><div class="tb-sub">CoverPanda workspace · account &amp; billing</div></div>
+    <span style="flex:1"></span>
+    <span class="tb-av">AR</span>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="wrap" id="wrap"></div>
+<div class="gate" id="gate"></div>
+<div class="scrim" id="scrim" onclick="closeModal()"></div>
+<div class="modal" id="modal"></div>
+<div id="toast"></div>
+
+<script>
+const $id=s=>document.getElementById(s);
+function ic(id,c){ return `<svg class="ic ${c||''}"><use href="#${id}"/></svg>`; }
+function toast(msg){ const t=$id('toast'); t.innerHTML=ic('i-check')+`<span>${msg}</span>`; t.classList.add('on'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('on'),3600); }
+function money(n){ return '$'+n.toLocaleString('en-US'); }
+
+/* proposed pricing — matches the journey ledger; all under review */
+const PRICE={ lite:99, full:249, perUnit:20, perSigning:750 };
+const STATE={ signedIn:false, tab:'billing', tier:'full', units:21, signings:2, autopay:true };
+
+function recurring(){ return (STATE.tier==='full'?PRICE.full:PRICE.lite) + STATE.units*PRICE.perUnit; }
+function usageThisPeriod(){ return STATE.signings*PRICE.perSigning; }
+
+/* ---------- login gate ---------- */
+function renderGate(){
+  return `<div class="gate-card">
+    <div class="gate-logo"><svg width="27" height="27" viewBox="0 0 26 26"><use href="#i-panda"/></svg></div>
+    <span class="seclab">CoverPanda workspace</span>
+    <h1>Sign in to Rally &amp; Roam.</h1>
+    <p>Welcome back, Arjun. We'll email you a secure sign-in link — no password to remember.</p>
+    <div class="form">
+      <div class="field"><label>Work email</label><input class="input" value="arjun@rallyandroam.com" /></div>
+    </div>
+    <button class="btn btn--dark btn--lg btn--block" onclick="enterPortal()">Email me a sign-in link ${ic('i-arrow','ic--s')}</button>
+    <div style="font-size:11px;color:var(--muted2);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px">${ic('i-lock','ic--s')} Passwordless · we never store a password</div>
+  </div>`;
+}
+function enterPortal(){ STATE.signedIn=true; toast('Signed in via magic link'); rerender(); }
+
+/* ---------- render ---------- */
+function rerender(){
+  const gate=$id('gate');
+  if(!STATE.signedIn){ gate.style.display='grid'; gate.innerHTML=renderGate(); return; }
+  gate.style.display='none'; gate.innerHTML='';
+  $id('tabs').innerHTML=[
+    ['billing','i-card','Plan & billing'],['usage','i-chart','Usage'],['invoices','i-doc','Invoices'],['team','i-users','Team'],['settings','i-cog','Settings'],
+  ].map(([k,icn,l])=>`<button class="${STATE.tab===k?'on':''}" onclick="STATE.tab='${k}';rerender()">${ic(icn,'ic--s')} ${l}</button>`).join('');
+  $id('wrap').innerHTML = ({billing:renderBilling,usage:renderUsage,invoices:renderInvoices,team:renderTeam,settings:renderSettings}[STATE.tab])();
+}
+
+/* ---------- plan & billing ---------- */
+function renderBilling(){
+  const isFull=STATE.tier==='full';
+  const base=isFull?PRICE.full:PRICE.lite;
+  return `<span class="seclab">Plan &amp; billing</span><h1 class="pg">Your CoverPanda plan</h1>
+    <div class="pgsub">Manage your subscription, usage charges, and payment method. <span class="propflag">${ic('i-bolt','ic--s')} Proposed pricing · under review</span></div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card">
+        <div class="plan-head"><div style="flex:1">
+          <span class="plan-badge">${isFull?'Full Platform':'Lite / Starter'}</span>
+          <div class="price" style="margin-top:11px">${money(base)}<span>/mo</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">+ ${money(PRICE.perUnit)} per connected unit</div>
+        </div></div>
+        <div style="margin-top:14px">
+          <div class="feat">${ic('i-check','ic--s')} Agreements + royalty payments</div>
+          <div class="feat">${ic('i-check','ic--s')} Vendor marketplace & Launch Agent</div>
+          ${isFull
+            ? `<div class="feat">${ic('i-check','ic--s')} Consolidated financials + AI CFO reports</div>`
+            : `<div class="feat" style="color:var(--muted2)"><svg class="ic ic--s" style="color:var(--muted2)"><use href="#i-lock"/></svg> Consolidated financials <b style="color:var(--violet)">· upgrade</b></div>`}
+        </div>
+        <div style="display:flex;gap:9px;margin-top:16px">
+          ${isFull
+            ? `<button class="btn btn--ghost btn--sm" onclick="openModal('downgrade')">Switch to Lite</button>`
+            : `<button class="btn btn--dark btn--sm" onclick="openModal('upgrade')">Upgrade to Full ${ic('i-arrow','ic--s')}</button>`}
+          <button class="mlink" onclick="openModal('cancel')">Cancel plan</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="seclab">Next invoice · estimated</div>
+        <div style="margin-top:12px">
+          <div class="billrow"><div><div class="bl">${isFull?'Full Platform':'Lite'} base</div><div class="bs">Monthly subscription</div></div><div class="bv">${money(base)}</div></div>
+          <div class="billrow"><div><div class="bl">Connected units</div><div class="bs">${STATE.units} × ${money(PRICE.perUnit)}</div></div><div class="bv">${money(STATE.units*PRICE.perUnit)}</div></div>
+          <div class="billrow"><div><div class="bl">Launch Agent signings</div><div class="bs">${STATE.signings} this period × ${money(PRICE.perSigning)} · usage</div></div><div class="bv">${money(usageThisPeriod())}</div></div>
+        </div>
+        <div class="billtot"><span class="bl" style="font-weight:700">Estimated total · Jul 1</span><span class="bv">${money(recurring()+usageThisPeriod())}</span></div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:8px">Recurring ${money(recurring())}/mo + usage. Launch Agent is billed per signed franchisee.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="seclab">Payment method</div>
+      <div class="pm" style="margin-top:11px"><div class="cardicon"></div>
+        <div style="flex:1"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Visa ending 4242</div><div style="font-size:11.5px;color:var(--muted)">Expires 09 / 28 · ${STATE.autopay?'autopay on':'autopay off'}</div></div>
+        <button class="btn btn--ghost btn--sm" onclick="toast('Update payment — handled in your password manager')">Update</button></div>
+      <div class="note">${ic('i-lock','ic--s')} Card details are tokenized by our payments processor. CoverPanda never stores your full card number.</div>
+    </div>`;
+}
+
+/* ---------- usage ---------- */
+function renderUsage(){
+  if(STATE.units===0){
+    return `<span class="seclab">Usage</span><h1 class="pg">Usage & metering</h1>
+      <div class="card"><div class="empty"><div class="ei">${ic('i-store')}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--ink)">No connected units yet</div>
+        <div style="font-size:12.5px;margin-top:5px;max-width:340px;margin-left:auto;margin-right:auto">You're only billed ${money(PRICE.perUnit)} per unit once a franchisee connects. Publish your Launch Agent to start signing units.</div>
+        <button class="btn btn--dark btn--sm" style="margin-top:14px" onclick="STATE.units=21;rerender();toast('Demo: 21 units connected')">Simulate connected units</button>
+      </div></div>`;
+  }
+  const cap=40, pctv=Math.round(STATE.units/cap*100);
+  return `<span class="seclab">Usage</span><h1 class="pg">Usage & metering</h1>
+    <div class="pgsub">What drives your bill this period.</div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card"><div class="seclab">Connected units · billed</div>
+        <div class="usage-big" style="margin-top:8px">${STATE.units}</div>
+        <div class="usage-sub">× ${money(PRICE.perUnit)} = ${money(STATE.units*PRICE.perUnit)} / mo</div>
+        <div class="meter"><div style="width:${pctv}%"></div></div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:7px">A unit bills only after its franchisee connects. Idle units are free.</div>
+      </div>
+      <div class="card"><div class="seclab">Launch Agent · this period</div>
+        <div class="usage-big" style="margin-top:8px">${STATE.signings}</div>
+        <div class="usage-sub">signed franchisees × ${money(PRICE.perSigning)} = ${money(usageThisPeriod())}</div>
+        <div style="margin-top:13px">
+          <div class="feat" style="padding:3px 0">${ic('i-check','ic--s')} Sam Rivera · Phoenix #2 · signed Jun 18</div>
+          <div class="feat" style="padding:3px 0">${ic('i-check','ic--s')} Jordan Lee · Goleta · signed Jun 9</div>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="seclab">This period at a glance</div>
+      <div class="billrow"><div class="bl">Recurring (base + units)</div><div class="bv">${money(recurring())}/mo</div></div>
+      <div class="billrow"><div class="bl">Launch Agent usage</div><div class="bv">${money(usageThisPeriod())}</div></div>
+      <div class="billrow"><div class="bl">Marketplace take-rate</div><div class="bv" style="color:var(--muted2)">set per category · in design</div></div>
+    </div>`;
+}
+
+/* ---------- invoices ---------- */
+function renderInvoices(){
+  const inv=[
+    ['Jun 1, 2026', recurring()+1500, 'Paid'],
+    ['May 1, 2026', recurring()+750, 'Paid'],
+    ['Apr 1, 2026', recurring(), 'Paid'],
+    ['Mar 1, 2026', 99+8*PRICE.perUnit, 'Paid'],
+  ];
+  return `<span class="seclab">Invoices</span><h1 class="pg">Billing history</h1>
+    <div class="pgsub">Every invoice, with a downloadable receipt.</div>
+    <div class="card" style="margin-top:18px">
+      ${inv.map(([d,amt,st])=>`<div class="invoice"><div class="ii">${ic('i-doc','ic--s')}</div>
+        <div style="flex:1"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">${d}</div><div style="font-size:11.5px;color:var(--muted)">CoverPanda subscription + usage</div></div>
+        <div style="text-align:right;margin-right:6px"><div style="font-family:var(--mono);font-weight:600;color:var(--ink)">${money(amt)}</div><div style="font-size:11px;color:var(--green-deep)">${st}</div></div>
+        <button class="btn btn--ghost btn--sm" onclick="toast('Downloading receipt…')">${ic('i-download','ic--s')}</button></div>`).join('')}
+    </div>`;
+}
+
+/* ---------- team ---------- */
+function renderTeam(){
+  const m=[
+    ['Arjun Rao','arjun@rallyandroam.com','AR','var(--blue)','Owner'],
+    ['Priya Shah','priya@rallyandroam.com','PS','var(--violet)','Admin'],
+    ['Devon Hill','devon@rallyandroam.com','DH','var(--amber)','Finance'],
+  ];
+  return `<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap">
+      <div><span class="seclab">Team</span><h1 class="pg">Workspace members</h1>
+        <div class="pgsub">Seats are included — invite your operations and finance team free.</div></div>
+      <button class="btn btn--dark btn--sm" onclick="toast('Invite sent — they get a magic-link to join')">${ic('i-plus','ic--s')} Invite member</button>
+    </div>
+    <div class="card" style="margin-top:18px">
+      ${m.map(([n,e,i,c,r])=>`<div class="member"><div class="av" style="background:${c}">${i}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">${n}</div><div style="font-size:11.5px;color:var(--muted)">${e}</div></div>
+        <span class="rolepill">${r}</span>
+        ${r==='Owner'?'':`<button class="mlink" onclick="toast('Manage access')">Manage</button>`}</div>`).join('')}
+    </div>`;
+}
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  return `<span class="seclab">Settings</span><h1 class="pg">Workspace settings</h1>
+    <div class="card" style="margin-top:18px">
+      <div class="seclab">Workspace</div>
+      <div class="field" style="margin-top:11px"><label>Brand / workspace name</label><input class="input" value="Rally & Roam" /></div>
+      <div class="field" style="margin-top:11px"><label>Primary contact</label><input class="input" value="arjun@rallyandroam.com" /></div>
+      <button class="btn btn--ghost btn--sm" style="margin-top:13px" onclick="toast('Workspace saved')">Save changes</button>
+    </div>
+    <div class="card">
+      <div class="seclab">Security</div>
+      <div class="feat" style="margin-top:10px">${ic('i-check','ic--s')} Passwordless sign-in (magic link) · on</div>
+      <div class="feat">${ic('i-check','ic--s')} Two-factor on owner & admin accounts</div>
+      <button class="btn btn--ghost btn--sm" style="margin-top:12px" onclick="toast('Security settings open in the full app')">Manage security</button>
+    </div>
+    <div class="card danger">
+      <div class="seclab" style="color:var(--red)">Danger zone</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:11px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">Cancel subscription</div><div style="font-size:11.5px;color:var(--muted)">Keeps your data 90 days; royalty collection pauses.</div></div>
+        <button class="btn btn--ghost btn--sm" onclick="openModal('cancel')">Cancel plan</button>
+      </div>
+    </div>`;
+}
+
+/* ---------- modals: upgrade / downgrade / cancel (decline flows) ---------- */
+function openModal(kind){
+  let h='';
+  if(kind==='upgrade'){
+    h=`<h3>Upgrade to Full Platform</h3>
+      <p>Add consolidated financials, QuickBooks roll-up, and AI CFO reports across every unit.</p>
+      <div class="note"><b>New monthly:</b> ${money(PRICE.full)} base + ${money(STATE.units*PRICE.perUnit)} units = <b>${money(PRICE.full+STATE.units*PRICE.perUnit)}/mo</b>. Effective today, prorated.</div>
+      <div style="display:flex;gap:9px;margin-top:16px"><button class="mlink" onclick="closeModal()">Not now</button><span style="flex:1"></span>
+        <button class="btn btn--green btn--lg" onclick="STATE.tier='full';closeModal();rerender();toast('Upgraded to Full Platform 🎉')">Confirm upgrade ${ic('i-arrow','ic--s')}</button></div>`;
+  } else if(kind==='downgrade'){
+    h=`<h3>Switch to Lite?</h3>
+      <p>You'll keep agreements, royalty payments, and the marketplace — but <b>lose consolidated financials and AI CFO reports</b>.</p>
+      <div class="note"><b>New monthly:</b> ${money(PRICE.lite)} base + ${money(STATE.units*PRICE.perUnit)} units = <b>${money(PRICE.lite+STATE.units*PRICE.perUnit)}/mo</b>, starting next cycle.</div>
+      <div style="display:flex;gap:9px;margin-top:16px"><button class="mlink" onclick="closeModal()">Keep Full</button><span style="flex:1"></span>
+        <button class="btn btn--ghost btn--lg" onclick="STATE.tier='lite';closeModal();rerender();toast('Switched to Lite at next cycle')">Switch to Lite</button></div>`;
+  } else {
+    h=`<h3>Cancel your subscription?</h3>
+      <p>Royalty collection and your Launch Agent pause immediately. Your data is kept for 90 days so you can return any time.</p>
+      <div class="note">Most brands pause instead — keep collecting royalties at ${money(PRICE.lite)}/mo on Lite. Want to switch to Lite instead?</div>
+      <div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap"><button class="btn btn--ghost btn--sm" onclick="closeModal()">Keep my plan</button><span style="flex:1"></span>
+        <button class="btn btn--ghost btn--sm" onclick="STATE.tier='lite';closeModal();rerender();toast('Switched to Lite — you keep collecting royalties')">Switch to Lite</button>
+        <button class="btn btn--red btn--sm" onclick="closeModal();toast('Cancellation scheduled for end of cycle')">Cancel anyway</button></div>`;
+  }
+  $id('modal').innerHTML=h+`<button class="mlink" style="position:absolute;top:14px;right:16px" onclick="closeModal()">${ic('i-x')}</button>`;
+  $id('scrim').classList.add('on'); $id('modal').classList.add('on');
+}
+function closeModal(){ $id('scrim').classList.remove('on'); $id('modal').classList.remove('on'); }
+
+rerender();
+</script>
+</body>
+</html>
