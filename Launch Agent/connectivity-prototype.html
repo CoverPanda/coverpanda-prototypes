@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CoverPanda — Your Franchise Comes Online (Connectivity Prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="../journey-nav.js"></script>
+<style>
+  :root{
+    --bg:#fbfaf8;--panel:#f6f4f0;--stone:#efece6;--border:#e8e4dc;--border2:#ddd7cd;--card:#fff;
+    --ink:#131210;--ink-soft:#36342f;--body:#4a4842;--muted:#6e6b63;--muted2:#8a867c;
+    --ember:#ff3e00;--ember-soft:#ffece4;--ember-deep:#c93100;--green:#00a843;--green-soft:#e3f6ea;--green-deep:#00702e;
+    --blue:#0084ec;--blue-soft:#e6f2fd;--violet:#6e56e8;--violet-soft:#efecfd;--amber:#a87a08;--amber-soft:#faf2dd;
+    --font:'Instrument Sans',-apple-system,sans-serif;--display:'Fraunces',Georgia,serif;--mono:'Spline Sans Mono',ui-monospace,monospace;
+    --inset:#efece6 0 0 0 1px inset;--inset2:#e8e4dc 0 0 0 1px inset;--pop:0 1px 2px rgba(19,18,16,.05),0 12px 34px rgba(19,18,16,.12);--pop-lg:0 2px 6px rgba(19,18,16,.07),0 24px 64px rgba(19,18,16,.16);
+    --spring:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--font);background:var(--bg);color:var(--body);-webkit-font-smoothing:antialiased;letter-spacing:-.008em;font-size:14px}
+  .ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .ic--s{width:13px;height:13px}.ic--l{width:20px;height:20px}
+
+  #bar{position:fixed;top:0;left:0;right:0;height:42px;z-index:200;background:#141312;color:#fff;display:flex;align-items:center;gap:13px;padding:0 14px;font-size:12.5px;border-bottom:1px solid #2a2825}
+  #bar .tag{display:inline-flex;align-items:center;gap:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:10.5px;color:#d8d4cc}
+  #bar .dot{width:7px;height:7px;border-radius:50%;background:var(--ember)}
+  #bar .sp{flex:1}
+  #bar button{background:#fff;color:#141312;border:0;border-radius:7px;padding:6px 13px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer}
+  #bar .hint{color:#999590;font-family:var(--mono);font-size:11px}
+
+  .app{padding-top:42px;min-height:100vh;display:grid;grid-template-columns:1fr 340px}
+  @media (max-width:1040px){.app{grid-template-columns:1fr}}
+  .main{padding:22px 26px 40px}
+  .head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:6px}
+  .head .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted2)}
+  .head .eyebrow .d{width:6px;height:6px;border-radius:50%;background:var(--ember)}
+  .head h1{font-family:var(--display);font-weight:500;font-size:27px;letter-spacing:-.015em;color:var(--ink);margin-top:7px}
+  .head .sub{font-size:13.5px;color:var(--muted);margin-top:3px}
+  .ringwrap{display:flex;align-items:center;gap:11px;background:var(--card);border-radius:14px;box-shadow:var(--inset);padding:10px 15px}
+  .ringwrap .rt{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted2)}
+  .ringwrap .rv{font-family:var(--display);font-size:19px;color:var(--ink);line-height:1}
+  .ringwrap .rs{font-size:11px;color:var(--muted);margin-top:1px}
+
+  /* canvas */
+  .canvas{position:relative;width:100%;max-width:940px;height:540px;margin:14px auto 0}
+  .canvas svg.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .edge{stroke:var(--border2);stroke-width:2;stroke-dasharray:5 6;opacity:.7}
+  .edge.lit{stroke-width:2.5;stroke-dasharray:none;opacity:1;animation:flow 1s var(--spring)}
+  @keyframes flow{from{stroke-dashoffset:60;opacity:.2}to{stroke-dashoffset:0;opacity:1}}
+  .grouplbl{position:absolute;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
+  .hub{position:absolute;width:108px;height:108px;border-radius:50%;background:var(--ink);display:grid;place-items:center;box-shadow:0 12px 30px rgba(19,18,16,.25);transform:translate(-50%,-50%)}
+  .hub .hubt{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--ink-soft);white-space:nowrap}
+  .hub .pulse{position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--green);opacity:0;animation:hp 2.4s var(--spring) infinite}
+  @keyframes hp{0%{transform:scale(.95);opacity:.5}100%{transform:scale(1.25);opacity:0}}
+
+  .node{position:absolute;width:138px;transform:translate(-50%,-50%);background:var(--card);border-radius:14px;box-shadow:var(--inset2);padding:12px 13px;cursor:pointer;transition:box-shadow .2s,transform .15s,opacity .3s;border:1.5px dashed var(--border2);opacity:.92}
+  .node:hover{transform:translate(-50%,-50%) translateY(-2px);box-shadow:var(--inset2),var(--pop)}
+  .node.lit{border-style:solid;border-color:transparent;box-shadow:0 0 0 1.5px var(--nc,var(--green)) inset,0 8px 22px -8px var(--nc,var(--green));opacity:1;background:var(--card)}
+  .node .ni{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--panel);color:var(--muted)}
+  .node.lit .ni{background:var(--ncs,var(--green-soft));color:var(--nc,var(--green-deep))}
+  .node .nl{font-size:13px;font-weight:700;color:var(--ink);margin-top:8px;letter-spacing:-.01em}
+  .node .ns{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35}
+  .node .nstat{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;margin-top:7px}
+  .node .nstat.off{color:var(--muted2)} .node .nstat.on{color:var(--nc,var(--green-deep))}
+  .node .nstat .b{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .node .req{position:absolute;top:9px;right:10px;font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--amber);background:var(--amber-soft);border-radius:99px;padding:2px 6px}
+  .node .pref{position:absolute;top:9px;right:10px;font-size:8.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--violet);background:var(--violet-soft);border-radius:99px;padding:2px 6px}
+
+  /* side panel */
+  .side{border-left:1px solid var(--border);background:var(--panel);padding:18px 16px;display:flex;flex-direction:column;gap:14px}
+  @media (max-width:1040px){.side{border-left:0;border-top:1px solid var(--border)}}
+  .panda{display:flex;gap:11px;align-items:flex-start}
+  .panda .av{flex:none;width:34px;height:34px;border-radius:11px;background:var(--ink);display:grid;place-items:center;position:relative}
+  .panda .av::after{content:"";position:absolute;right:-2px;bottom:-2px;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--panel)}
+  .panda .bub{background:var(--card);border-radius:4px 14px 14px 14px;box-shadow:var(--inset2);padding:12px 14px;font-size:13px;line-height:1.55;color:var(--body)}
+  .panda .bub b{color:var(--ink)}
+  .seclab{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2)}
+  .feed{display:flex;flex-direction:column;gap:8px}
+  .tile{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:12px;box-shadow:var(--inset2);padding:11px 13px;animation:rise .4s var(--spring)}
+  .tile .ti{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none}
+  .tile .tt{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .tile .td{font-size:11px;color:var(--muted);margin-top:1px}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .emptyfeed{font-size:12px;color:var(--muted2);text-align:center;padding:18px 8px;line-height:1.5}
+  .seam{font-size:11px;color:var(--muted);line-height:1.5;background:var(--card);border-radius:12px;box-shadow:var(--inset2);padding:11px 13px}
+  .seam b{color:var(--ink-soft)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font);font-size:13.5px;font-weight:600;border:0;border-radius:999px;cursor:pointer;padding:10px 17px;transition:transform .1s,background .15s;text-decoration:none;white-space:nowrap}
+  .btn:active{transform:scale(.98)}
+  .btn--dark{background:var(--ink);color:#fff}.btn--dark:hover{background:#2e2c28}
+  .btn--green{background:var(--green);color:#fff}.btn--green:hover{background:#009039}
+  .btn--ghost{background:transparent;color:var(--ink-soft);box-shadow:var(--inset2)}.btn--ghost:hover{background:var(--panel)}
+  .btn--block{width:100%;display:flex}.btn--sm{padding:8px 13px;font-size:12.5px}
+  .mlink{color:var(--muted);cursor:pointer;font-size:12.5px;background:none;border:0;font-family:var(--font)}.mlink:hover{color:var(--ink)}
+
+  /* drawer (meet-moment) */
+  .scrim{position:fixed;inset:0;background:rgba(19,18,16,.34);backdrop-filter:blur(2px);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:96vw;background:var(--bg);z-index:310;box-shadow:var(--pop-lg);transform:translateX(106%);transition:transform .38s var(--spring);display:flex;flex-direction:column}
+  .drawer.on{transform:none}
+  .dhead{display:flex;align-items:center;gap:12px;padding:18px 22px 14px;border-bottom:1px solid var(--border)}
+  .dhead .x{margin-left:auto;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+  .dhead .x:hover{background:var(--stone);color:var(--ink)}
+  .dbody{flex:1;overflow-y:auto;padding:20px 22px}
+  .dfoot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:9px;align-items:center;background:var(--bg)}
+  .dsteps{display:flex;gap:6px;padding:0 22px 12px}
+  .dstep{flex:1;height:4px;border-radius:99px;background:var(--stone)}
+  .dstep.on{background:var(--ink)} .dstep.done{background:var(--green)}
+  .vcard{display:flex;gap:13px;align-items:center}
+  .vlogo{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:22px;color:#fff;flex:none}
+  .vname{font-size:17px;font-weight:700;color:var(--ink)}
+  .vmeta{font-size:12px;color:var(--muted);margin-top:2px}
+  .vbadge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 9px;margin-top:6px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border-radius:999px;padding:6px 11px;font-size:11.5px;font-weight:600;color:var(--ink-soft);box-shadow:var(--inset2)}
+  .row{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--body);padding:7px 0;line-height:1.5}
+  .row .ic{color:var(--green);margin-top:2px}
+  .prop{background:var(--card);border-radius:14px;box-shadow:var(--inset2);overflow:hidden}
+  .prop .ph{padding:13px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)}
+  .prop .ph b{color:var(--ink-soft)}
+  .prop .pb{padding:15px 16px}
+  .prefill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--violet);background:var(--violet-soft);border-radius:99px;padding:4px 10px;margin-bottom:11px}
+  .lineitem{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #f4f1ec}
+  .lineitem:last-child{border-bottom:0}.lineitem b{color:var(--ink)}
+  .doc{background:#fff;border-radius:10px;box-shadow:var(--inset2),0 10px 28px rgba(19,18,16,.06);padding:22px 24px;font-size:12px;color:var(--body)}
+  .doc h4{font-family:var(--display);font-size:17px;font-weight:550;color:var(--ink);margin-bottom:3px}
+  .docline{height:7px;border-radius:4px;background:var(--stone);margin-top:9px}.docline.w70{width:70%}.docline.w85{width:85%}
+  .sigbox{margin-top:16px;border:1.5px dashed var(--border2);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .15s}
+  .sigbox:hover{border-color:var(--ink-soft);background:var(--panel)}
+  .sigbox.signed{border-style:solid;border-color:var(--green);background:var(--green-soft);cursor:default}
+  .sigbox .sg{font-family:var(--display);font-size:22px;color:var(--ink);font-style:italic}
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:12px;font-weight:650;margin-bottom:6px;color:var(--ink-soft)}
+  .input{width:100%;font-family:var(--font);font-size:13.5px;color:var(--ink);background:var(--card);border:0;box-shadow:var(--inset2);border-radius:10px;padding:10px 12px;outline:none}
+  .input:focus{box-shadow:var(--ink-soft) 0 0 0 1.5px inset}
+  .note{font-size:12px;color:var(--muted);line-height:1.55;background:var(--panel);border-radius:12px;padding:12px 14px;margin-top:14px}
+  .note b{color:var(--ink-soft)}
+  .donecheck{width:56px;height:56px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;margin:8px auto 0}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(90px);z-index:400;background:var(--ink);color:#fff;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:11px;box-shadow:var(--pop-lg);transition:transform .35s var(--spring);max-width:92vw}
+  #toast.on{transform:translateX(-50%) translateY(0)}
+  #toast .ic{color:#7ee2a4}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-panda" viewBox="0 0 26 26"><circle cx="9.7" cy="13.3" r="1.5" fill="#fff" stroke="none"/><circle cx="16.3" cy="13.3" r="1.5" fill="#fff" stroke="none"/><path d="M10.5 17.2c.9 1 3.1 1 4 0" stroke="#fff" stroke-width="1.4" fill="none"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6"/><path d="M4 9v11M20 9v11M8 12v5M12 12v5M16 12v5"/><path d="M2 20h20"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v-4M12 17V8M17 13v-3"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 4.6a3.5 3.5 0 0 1 0 6.8M17.5 14.3c2.4.8 4 2.8 4 5.7"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a4 4 0 0 0 6 0zM19 7l-3 7a4 4 0 0 0 6 0z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l1.9 5.7L20 9.6l-5.6 2.3L12 18l-2.4-6.1L4 9.6l6.1-1.9z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+</svg>
+
+<div id="bar">
+  <span class="tag"><span class="dot"></span> Connectivity · your franchise comes online</span>
+  <span class="hint">click any dim node to connect · CoverPanda services pre-loaded</span>
+  <span class="sp"></span>
+  <button onclick="resetAll()">↺ Restart</button>
+</div>
+
+<div class="app">
+  <main class="main">
+    <div class="head">
+      <div>
+        <span class="eyebrow"><span class="d"></span> Bright Pickleball · Tucson #1 · onboarding</span>
+        <h1 id="h1">Let's get your unit online.</h1>
+        <div class="sub" id="sub">Connect your own data and meet the vendors Bright Pickleball lined up — each connection powers up a piece of your business.</div>
+      </div>
+      <div class="ringwrap">
+        <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="var(--stone)" stroke-width="5"/><circle id="ringArc" cx="23" cy="23" r="19" fill="none" stroke="var(--green)" stroke-width="5" stroke-linecap="round" stroke-dasharray="119" stroke-dashoffset="119" transform="rotate(-90 23 23)" style="transition:stroke-dashoffset .5s var(--spring)"/></svg>
+        <div><div class="rt">This unit</div><div class="rv" id="ringTxt">0 of 8</div><div class="rs">online</div></div>
+      </div>
+    </div>
+    <div class="canvas" id="canvas"></div>
+  </main>
+  <aside class="side">
+    <div class="panda"><div class="av"><svg width="20" height="20" viewBox="0 0 26 26"><use href="#i-panda"/></svg></div>
+      <div class="bub" id="pandaBub">I pre-loaded Bright Pickleball's vendor stack and your data sources. <b>Tap any dim node</b> — your own QuickBooks, or a vendor like your accountant — and watch it come online.</div></div>
+    <div><div class="seclab" style="margin-bottom:9px">What's come online</div><div class="feed" id="feed"><div class="emptyfeed">Nothing connected yet.<br/>Each connection lights up here.</div></div></div>
+    <div class="seam" id="seam">🔗 <b>The seam:</b> when you connect your QuickBooks, it also feeds <b>Bright Pickleball's</b> network P&amp;L — your books and the brand's roll-up are the same data.</div>
+  </aside>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer"></div>
+<div id="toast"></div>
+
+<script>
+/* ---------- state ---------- */
+const HUB = {x:470, y:270};
+const NODES = [
+  // --- your data (left), self-serve ---
+  {id:'qbo', kind:'data', label:'QuickBooks', sub:'Your books', icon:'i-chart', cx:150, cy:140,
+   color:'green', connected:false, connect:'oauth',
+   liveline:'QuickBooks · syncing', value:{icon:'i-chart',c:'green',t:'Unit P&L is live',d:'Revenue, COGS & margin updating in real time'},
+   narrate:"QuickBooks is in. Your unit P&L is live now — and the same sync feeds <b>Bright Pickleball's</b> network roll-up. One connection, both views."},
+  {id:'pos', kind:'data', label:'Mindbody POS', sub:'Sales & bookings', icon:'i-cart', cx:150, cy:270,
+   color:'blue', connected:false, connect:'oauth',
+   liveline:'Mindbody · connected', value:{icon:'i-cart',c:'blue',t:'Daily sales flowing',d:'Court bookings & retail post automatically'},
+   narrate:"Mindbody's connected. Daily sales and court bookings flow straight into your numbers — no manual entry, no month-end scramble."},
+  {id:'bank', kind:'data', label:'Operating bank', sub:'Cash & royalties', icon:'i-bank', cx:150, cy:400,
+   color:'amber', connected:false, connect:'oauth',
+   liveline:'Bank · linked', value:{icon:'i-bank',c:'amber',t:'Royalty payments armed',d:'Royalties auto-collect from this account'},
+   narrate:"Bank linked. Royalties will auto-collect on schedule and your cash position updates live — Bright Pickleball never has to chase you for a payment again."},
+  // --- your stack (right), vendor meet-moments ---
+  {id:'acct', kind:'vendor', label:'Accounting', sub:'CoverPanda Accounting', icon:'i-chart', cx:790, cy:90,
+   color:'green', connected:false, tag:'pref',
+   vendor:{name:'CoverPanda Accounting', logo:'CP', logoBg:'var(--ink)',
+     intro:"Bright Pickleball's preferred accountant", badge:'pref',
+     blurb:"Books, royalty-ready P&L, and tax prep — built to Bright Pickleball's chart of accounts, so your numbers match the brand's reports out of the box.",
+     incl:['Monthly bookkeeping + reconciliation',"Royalty-ready P&L on the brand's template",'Year-end tax package','Reads straight from your connected QuickBooks'],
+     rating:'4.9', reviews:'212 franchise units',
+     proposal:{title:'Monthly bookkeeping — Tucson #1', items:[['Monthly bookkeeping & reconciliation','$240/mo'],['Royalty-ready P&L (brand template)','included'],['Year-end tax package','$600/yr'],['First month','free']], rate:'$240/mo', today:'$0.00', todaynote:'first month free · then $240/mo'},
+     alt:'Use a different accountant'}},
+  {id:'pay', kind:'vendor', label:'Payroll', sub:'CoverPanda Payroll', icon:'i-users', cx:790, cy:180,
+   color:'violet', connected:false, tag:'pref',
+   vendor:{name:'CoverPanda Payroll', logo:'CP', logoBg:'var(--violet)',
+     intro:"Bright Pickleball's preferred payroll", badge:'pref',
+     blurb:"Run payroll, file taxes, and issue pay before your first hire's first shift. Hours flow in from Mindbody automatically.",
+     incl:['Full-service payroll + tax filing','Pulls hours from Mindbody POS','Pay cards & direct deposit','New-hire onboarding & W-2s'],
+     rating:'4.8', reviews:'190 franchise units',
+     proposal:{title:'Payroll — Tucson #1', items:[['Base platform','$45/mo'],['Per active employee','$8/ea'],['Tax filing & year-end','included'],['First month','free']], rate:'$45/mo + $8/employee', today:'$0.00', todaynote:'first month free'},
+     alt:'Use a different payroll provider'}},
+  {id:'ins', kind:'vendor', label:'Insurance', sub:'Marsh Local (required)', icon:'i-shield', cx:790, cy:270,
+   color:'blue', connected:false, tag:'req',
+   vendor:{name:'Marsh Local', logo:'ML', logoBg:'var(--blue)',
+     intro:"Required by Bright Pickleball's FDD", badge:'req',
+     blurb:"GL, property, and workers' comp written to Bright Pickleball's exact coverage minimums — so your COI clears compliance the day you bind it.",
+     incl:['$2M general liability (brand minimum)','Property + business interruption',"Workers' comp",'COI auto-shared to Bright Pickleball'],
+     rating:'4.7', reviews:'Brand-mandated carrier',
+     reqnote:"This category is required by your FDD. You're free to bind elsewhere — but quoting here auto-files your COI to the brand and there's nothing to chase.",
+     proposal:{title:'Franchise package — Tucson #1', items:[['General liability ($2M)','$3,400/yr'],['Property + BI','$2,900/yr'],["Workers' comp",'$1,800/yr'],['Bill monthly','$675/mo']], rate:'$8,100/yr', today:'$675.00', todaynote:'first monthly installment'},
+     alt:'Bind with an outside agent'}},
+  {id:'lend', kind:'vendor', label:'Lending', sub:'CoverPanda Lending', icon:'i-bank', cx:790, cy:360,
+   color:'amber', connected:false, tag:'pref',
+   vendor:{name:'CoverPanda Lending', logo:'CP', logoBg:'var(--amber)',
+     intro:"Bright Pickleball's financing partner", badge:'pref',
+     blurb:"SBA-backed build-out and equipment financing, pre-scoped to Bright Pickleball's typical buildout — pre-qualify without a hard pull.",
+     incl:['SBA 7(a) build-out financing','Equipment & court financing','Pre-qual with no hard credit pull','Funds tracked on your canvas'],
+     rating:'4.8', reviews:'$140M funded',
+     proposal:{title:'Build-out financing — Tucson #1', items:[['Requested amount','$185,000'],['Est. rate','11.2% APR'],['Term','10 yr'],['Application fee','$0']], rate:'$185,000 requested', today:'$0.00', todaynote:'no fee to apply'},
+     alt:'Finance through another lender'}},
+  {id:'legal', kind:'vendor', label:'Legal', sub:'Hatch Legal', icon:'i-scale', cx:790, cy:450,
+   color:'violet', connected:false, tag:'pref',
+   vendor:{name:'Hatch Legal', logo:'HL', logoBg:'#3a3550',
+     intro:"Bright Pickleball's preferred attorney", badge:'pref',
+     blurb:"Entity formation, lease review, and your franchise agreement walkthrough — a fixed-fee package built for new Bright Pickleball units.",
+     incl:['LLC / entity formation','Commercial lease review','Franchise agreement walkthrough','Registered agent (1 yr)'],
+     rating:'4.9', reviews:'88 franchise units',
+     proposal:{title:'New-unit legal package — Tucson #1', items:[['Entity formation','$900'],['Lease review','$650'],['FA walkthrough','$500'],['Registered agent (1 yr)','included']], rate:'$2,050 flat', today:'$1,025.00', todaynote:'50% to start · balance on completion'},
+     alt:'Use your own attorney'}},
+];
+
+const COLORS = {green:['var(--green)','var(--green-soft)','var(--green-deep)'],blue:['var(--blue)','var(--blue-soft)','#0a5fa8'],
+  amber:['var(--amber)','var(--amber-soft)','#7a5a04'],violet:['var(--violet)','var(--violet-soft)','#4a37c0']};
+
+let MEET = {nodeId:null, step:0, signed:false, paid:false};
+
+/* ---------- canvas render ---------- */
+function renderCanvas(){
+  const c = document.getElementById('canvas');
+  const PX=v=>(v/940*100).toFixed(2)+'%', PY=v=>(v/540*100).toFixed(2)+'%';
+  let edges = '<svg class="edges" viewBox="0 0 940 540" preserveAspectRatio="none">';
+  NODES.forEach(n=>{
+    const lit = n.connected ? ' lit' : '';
+    const col = COLORS[n.color][0];
+    edges += `<line class="edge${lit}" x1="${HUB.x}" y1="${HUB.y}" x2="${n.cx}" y2="${n.cy}"${n.connected?` stroke="${col}"`:''}/>`;
+  });
+  edges += '</svg>';
+
+  let nodes = '';
+  // group labels
+  nodes += `<div class="grouplbl" style="left:96px;top:34px">Your data — you connect</div>`;
+  nodes += `<div class="grouplbl" style="right:60px;top:34px;text-align:right">Your stack — vendors</div>`;
+  // hub
+  const lc = NODES.filter(n=>n.connected).length;
+  nodes += `<div class="hub" style="left:${PX(HUB.x)};top:${PY(HUB.y)}">
+      ${lc>0?'<span class="pulse"></span>':''}
+      <svg width="40" height="40" viewBox="0 0 26 26"><circle cx="13" cy="13" r="13" fill="#fff" opacity=".08"/><use href="#i-panda"/></svg>
+      <span class="hubt">CoverPanda · Tucson #1</span>
+    </div>`;
+  // nodes
+  NODES.forEach(n=>{
+    const [c1,c2,c3] = COLORS[n.color];
+    const lit = n.connected ? ' lit' : '';
+    const style = `left:${PX(n.cx)};top:${PY(n.cy)};--nc:${c1};--ncs:${c2}`;
+    const tag = n.tag==='req' ? `<span class="req">Required</span>` : n.tag==='pref' ? `<span class="pref">Preferred</span>` : '';
+    const stat = n.connected
+      ? `<span class="nstat on"><span class="b"></span>Connected</span>`
+      : `<span class="nstat off"><span class="b"></span>${n.kind==='data'?'Tap to connect':'Tap to meet'}</span>`;
+    nodes += `<div class="node${lit}" style="${style}" onclick="tapNode('${n.id}')">
+        ${tag}
+        <div class="ni"><svg class="ic"><use href="#${n.connected?'i-check':n.icon}"/></svg></div>
+        <div class="nl">${n.label}</div>
+        <div class="ns">${n.connected ? n.liveline||'Connected' : n.sub}</div>
+        ${stat}
+      </div>`;
+  });
+  c.innerHTML = edges + nodes;
+  updateProgress();
+}
+
+function updateProgress(){
+  const lc = NODES.filter(n=>n.connected).length, tot = NODES.length;
+  const arc = document.getElementById('ringArc');
+  const circ = 2*Math.PI*19;
+  arc.setAttribute('stroke-dasharray', circ.toFixed(0));
+  arc.setAttribute('stroke-dashoffset', (circ*(1-lc/tot)).toFixed(1));
+  document.getElementById('ringTxt').textContent = `${lc} of ${tot}`;
+  // header shifts as it fills
+  const h1 = document.getElementById('h1'), sub = document.getElementById('sub');
+  if(lc===0){h1.textContent="Let's get your unit online.";}
+  else if(lc<tot){h1.textContent=`Tucson #1 is coming online.`; sub.textContent=`${lc} of ${tot} connections live. Keep going — each one powers up another piece of your business.`;}
+  else {h1.textContent="Tucson #1 is fully online. 🎉"; sub.textContent="Every data source and vendor is connected. Bright Pickleball sees you as launch-ready.";}
+}
+
+/* ---------- feed + panda ---------- */
+function pandaSay(html){ document.getElementById('pandaBub').innerHTML = html; }
+function addTile(v){
+  const feed = document.getElementById('feed');
+  const empty = feed.querySelector('.emptyfeed'); if(empty) empty.remove();
+  const [c1,c2,c3] = COLORS[v.c];
+  const el = document.createElement('div');
+  el.className='tile';
+  el.innerHTML = `<div class="ti" style="background:${c2};color:${c3}"><svg class="ic"><use href="#${v.icon}"/></svg></div>
+    <div><div class="tt">${v.t}</div><div class="td">${v.d}</div></div>`;
+  feed.prepend(el);
+}
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<svg class="ic"><use href="#i-check"/></svg> ${msg}`;
+  t.classList.add('on'); clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('on'),3200);
+}
+
+/* ---------- node tap ---------- */
+function tapNode(id){
+  const n = NODES.find(x=>x.id===id);
+  if(n.connected){ toast(`${n.label} is already connected.`); return; }
+  if(n.kind==='data') connectData(n);
+  else openMeet(n);
+}
+
+function connectData(n){
+  pandaSay(`Connecting <b>${n.label}</b>… you'll authorize it in a secure window — I never see your password.`);
+  toast(`Opening ${n.label} secure connect…`);
+  setTimeout(()=>{
+    n.connected = true;
+    renderCanvas();
+    addTile(n.value);
+    pandaSay(n.narrate);
+    toast(`${n.label} connected.`);
+  }, 1050);
+}
+
+/* ---------- meet-moment drawer ---------- */
+function openMeet(n){
+  MEET = {nodeId:n.id, step:0, signed:false, paid:false};
+  document.getElementById('scrim').classList.add('on');
+  document.getElementById('drawer').classList.add('on');
+  renderMeet();
+}
+function closeDrawer(){
+  document.getElementById('scrim').classList.remove('on');
+  document.getElementById('drawer').classList.remove('on');
+}
+function meetGo(step){ MEET.step=step; renderMeet(); }
+
+function renderMeet(){
+  const n = NODES.find(x=>x.id===MEET.nodeId); const v = n.vendor;
+  const [c1,c2,c3] = COLORS[n.color];
+  const steps = ['Meet','Proposal','Agreement','Pay'];
+  const stepBar = `<div class="dsteps">${steps.map((s,i)=>`<div class="dstep ${i<MEET.step?'done':i===MEET.step?'on':''}"></div>`).join('')}</div>`;
+  let body='', foot='';
+
+  if(MEET.step===0){ // profile
+    const badge = v.badge==='req'
+      ? `<span class="vbadge" style="color:var(--amber);background:var(--amber-soft)"><svg class="ic ic--s"><use href="#i-shield"/></svg>${v.intro}</span>`
+      : `<span class="vbadge" style="color:var(--violet);background:var(--violet-soft)"><svg class="ic ic--s"><use href="#i-spark"/></svg>${v.intro}</span>`;
+    body = `
+      <div class="vcard">
+        <div class="vlogo" style="background:${v.logoBg}">${v.logo}</div>
+        <div><div class="vname">${v.name}</div>
+          <div class="vmeta">★ ${v.rating} · ${v.reviews}</div>
+          ${badge}
+        </div>
+      </div>
+      <p style="font-size:13.5px;line-height:1.6;color:var(--body);margin:16px 0 4px">${v.blurb}</p>
+      <div style="margin-top:14px">${v.incl.map(i=>`<div class="row"><svg class="ic"><use href="#i-check"/></svg><span>${i}</span></div>`).join('')}</div>
+      ${v.reqnote?`<div class="note"><b>Why this is here:</b> ${v.reqnote}</div>`:`<div class="note">🐼 <b>Why I lined them up:</b> they're pre-loaded with Bright Pickleball's terms and read from the data you already connected — so your proposal comes back pre-filled, not from scratch.</div>`}
+    `;
+    foot = `<button class="mlink" onclick="meetAlt()">${v.alt}</button><span class="sp" style="flex:1"></span>
+      <button class="btn btn--dark" onclick="meetGo(1)">Request proposal <svg class="ic"><use href="#i-arrow"/></svg></button>`;
+  }
+
+  else if(MEET.step===1){ // proposal (pre-filled)
+    const p = v.proposal;
+    body = `
+      <div class="prefill"><svg class="ic ic--s"><use href="#i-spark"/></svg> Pre-filled from your unit + Bright Pickleball's terms</div>
+      <div class="prop">
+        <div class="ph"><b>${p.title}</b> · prepared by ${v.name}</div>
+        <div class="pb">
+          ${p.items.map(([k,val])=>`<div class="lineitem"><span>${k}</span><b>${val}</b></div>`).join('')}
+        </div>
+      </div>
+      <div class="note">You didn't fill out a single field. ${v.name} already knows your unit, your brand's chart of accounts, and your connected data — so this came back ready to sign. <b>Going off-platform means starting this from a blank form.</b></div>
+    `;
+    foot = `<button class="mlink" onclick="meetGo(0)">Back</button><span class="sp" style="flex:1"></span>
+      <button class="btn btn--dark" onclick="meetGo(2)">Review &amp; sign <svg class="ic"><use href="#i-arrow"/></svg></button>`;
+  }
+
+  else if(MEET.step===2){ // agreement + sign
+    const p = v.proposal;
+    body = `
+      <div class="doc">
+        <h4>Service Agreement</h4>
+        <div style="font-size:11px;color:var(--muted)">${v.name} &nbsp;·&nbsp; Bright Pickleball — Tucson #1</div>
+        <div class="docline w85"></div><div class="docline"></div><div class="docline w70"></div>
+        <div style="margin:13px 0;padding:11px 13px;background:var(--panel);border-radius:9px;font-size:12.5px">
+          <b>Scope:</b> ${p.title}<br/><b>Fee:</b> ${p.rate}
+        </div>
+        <div class="docline"></div><div class="docline w85"></div>
+        <div class="sigbox ${MEET.signed?'signed':''}" onclick="meetSign()">
+          ${MEET.signed
+            ? `<div class="sg">Jordan Lee</div><div style="font-size:11px;color:var(--green-deep);margin-top:4px;font-weight:600">✓ Signed · ${'Jun 17, 2026'}</div>`
+            : `<div style="font-size:13px;font-weight:600;color:var(--ink-soft)">Tap to sign</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Native e-sign — same rail as your franchise agreement</div>`}
+        </div>
+      </div>`;
+    foot = `<button class="mlink" onclick="meetGo(1)">Back</button><span class="sp" style="flex:1"></span>
+      <button class="btn ${MEET.signed?'btn--dark':'btn--ghost'}" ${MEET.signed?`onclick="meetGo(3)"`:'disabled style="opacity:.45;cursor:not-allowed"'}>Continue to payment <svg class="ic"><use href="#i-arrow"/></svg></button>`;
+  }
+
+  else if(MEET.step===3 && !MEET.paid){ // pay
+    const p = v.proposal;
+    body = `
+      <div class="field"><label>Due today</label>
+        <div style="font-family:var(--display);font-size:28px;color:var(--ink);line-height:1">${p.today}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">${p.todaynote}</div>
+      </div>
+      <div class="field"><label>Card number</label><div class="input" style="display:flex;align-items:center;gap:9px;color:var(--muted)"><svg class="ic"><use href="#i-card"/></svg> •••• •••• •••• 4242</div></div>
+      <div style="display:flex;gap:11px"><div class="field" style="flex:1"><label>Expiry</label><div class="input" style="color:var(--muted)">09 / 28</div></div>
+        <div class="field" style="flex:1"><label>CVC</label><div class="input" style="color:var(--muted)">•••</div></div></div>
+      <div class="note">🔒 Billed on CoverPanda's payment rail — the same one collecting your royalties. One place for every dollar in and out of Tucson #1. <b>CoverPanda earns its marketplace fee here no matter which vendor you picked.</b></div>
+    `;
+    foot = `<button class="mlink" onclick="meetGo(2)">Back</button><span class="sp" style="flex:1"></span>
+      <button class="btn btn--green" onclick="meetPay()">Connect &amp; activate ${v.name.split(' ')[0]} <svg class="ic"><use href="#i-check"/></svg></button>`;
+  }
+
+  else { // done
+    body = `
+      <div class="donecheck"><svg class="ic ic--l"><use href="#i-check"/></svg></div>
+      <h4 style="font-family:var(--display);font-size:21px;font-weight:550;color:var(--ink);text-align:center;margin-top:14px">${v.name} is connected.</h4>
+      <p style="text-align:center;font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:8px">Signed, paid, and live — all without leaving CoverPanda. Their node just lit up on your canvas.</p>
+      <div class="note" style="text-align:left">🐼 ${meetDone(n).narrate}</div>
+    `;
+    foot = `<span class="sp" style="flex:1"></span><button class="btn btn--dark" onclick="closeDrawer()">Back to canvas</button>`;
+  }
+
+  document.getElementById('drawer').innerHTML = `
+    <div class="dhead">
+      <div class="vlogo" style="width:38px;height:38px;border-radius:11px;font-size:16px;background:${v.logoBg}">${v.logo}</div>
+      <div><div style="font-size:14px;font-weight:700;color:var(--ink)">${v.name}</div>
+        <div style="font-size:11.5px;color:var(--muted)">${n.label} · marketplace</div></div>
+      <div class="x" onclick="closeDrawer()"><svg class="ic"><use href="#i-x"/></svg></div>
+    </div>
+    ${MEET.step<4 && !MEET.paid ? stepBar : ''}
+    <div class="dbody">${body}</div>
+    <div class="dfoot">${foot}</div>`;
+}
+
+function meetSign(){ if(MEET.signed) return; MEET.signed=true; renderMeet(); toast('Agreement signed.'); }
+function meetAlt(){
+  const n=NODES.find(x=>x.id===MEET.nodeId);
+  toast("Off-platform: you'll set them up, file your own paperwork, and track it yourself.");
+  pandaSay(`Totally your call — you can use your own ${n.label.toLowerCase()} provider. Just know you'll handle their setup, agreement, and payments off-platform, and Bright Pickleball won't see compliance update automatically. The on-platform option is one tap.`);
+}
+function meetPay(){
+  MEET.paid=true;
+  const n = NODES.find(x=>x.id===MEET.nodeId);
+  meetDone(n, true);
+  renderMeet();
+}
+function meetDone(n, commit){
+  const data = {
+    acct:{value:{icon:'i-chart',c:'green',t:'Accounting connected',d:'CoverPanda Accounting · books + royalty-ready P&L'}, narrate:"CoverPanda Accounting is on. Your books reconcile monthly and your P&L lands on Bright Pickleball's exact template — so brand reports and your reports never disagree."},
+    pay:{value:{icon:'i-users',c:'violet',t:'Payroll connected',d:'CoverPanda Payroll · ready before your first hire'}, narrate:"Payroll's live. The day you hire, you can run it — hours pull from Mindbody, taxes file themselves."},
+    ins:{value:{icon:'i-shield',c:'blue',t:'Insurance bound',d:"Marsh Local · COI auto-filed to Bright Pickleball"}, narrate:"You're covered to the brand's spec — and your COI just auto-filed to Bright Pickleball. That compliance box checks itself; nobody has to chase you."},
+    lend:{value:{icon:'i-bank',c:'amber',t:'Financing in motion',d:'CoverPanda Lending · $185K application live'}, narrate:"Your financing application is in. As funds move, you'll watch them land right here on the canvas."},
+    legal:{value:{icon:'i-scale',c:'violet',t:'Legal package engaged',d:'Hatch Legal · formation + lease review'}, narrate:"Hatch Legal is engaged. Entity, lease, and your FA walkthrough are handled — the legal node is lit."},
+  }[n.id];
+  if(commit){
+    n.connected = true;
+    renderCanvas();
+    addTile(data.value);
+    pandaSay(data.narrate);
+    toast(`${n.vendor.name} connected.`);
+  }
+  return data;
+}
+
+/* ---------- reset ---------- */
+function resetAll(){
+  NODES.forEach(n=>n.connected=false);
+  closeDrawer();
+  document.getElementById('feed').innerHTML='<div class="emptyfeed">Nothing connected yet.<br/>Each connection lights up here.</div>';
+  pandaSay(`I pre-loaded Bright Pickleball's vendor stack and your data sources. <b>Tap any dim node</b> — your own QuickBooks, or a vendor like your accountant — and watch it come online.`);
+  renderCanvas();
+}
+
+renderCanvas();
+</script>
+</body>
+</html>

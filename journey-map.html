@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CoverPanda — Your Adoption Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#fbfaf8;--panel:#f6f4f0;--stone:#efece6;--border:#e8e4dc;--border2:#ddd7cd;--card:#fff;
+    --ink:#131210;--ink-soft:#36342f;--body:#4a4842;--muted:#6e6b63;--muted2:#8a867c;
+    --ember:#ff3e00;--ember-soft:#ffece4;--ember-deep:#c93100;--green:#00a843;--green-soft:#e3f6ea;--green-deep:#00702e;
+    --blue:#0084ec;--blue-soft:#e6f2fd;--violet:#6e56e8;--violet-soft:#efecfd;--amber:#a87a08;--amber-soft:#faf2dd;
+    --font:'Instrument Sans',-apple-system,sans-serif;--display:'Fraunces',Georgia,serif;--mono:'Spline Sans Mono',ui-monospace,monospace;
+    --inset:#efece6 0 0 0 1px inset;--inset2:#e8e4dc 0 0 0 1px inset;--pop:0 1px 2px rgba(19,18,16,.05),0 12px 34px rgba(19,18,16,.12);--pop-lg:0 2px 6px rgba(19,18,16,.07),0 24px 64px rgba(19,18,16,.16);
+    --spring:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--body);-webkit-font-smoothing:antialiased;letter-spacing:-.008em;font-size:14px;min-height:100vh}
+  .ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .ic--s{width:13px;height:13px}.ic--l{width:20px;height:20px}
+
+  #bar{position:sticky;top:0;left:0;right:0;height:46px;z-index:50;background:#141312;color:#fff;display:flex;align-items:center;gap:13px;padding:0 18px;font-size:12.5px;border-bottom:1px solid #2a2825}
+  #bar .brand{display:inline-flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.01em;font-size:13.5px}
+  #bar .brand svg{border-radius:7px}
+  #bar .tag{font-family:var(--mono);font-size:11px;color:#999590;letter-spacing:.02em}
+  #bar .sp{flex:1}
+  #bar button{background:transparent;color:#c9c5bd;border:1px solid #38352f;border-radius:8px;padding:6px 12px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer}
+  #bar button:hover{background:#222019;color:#fff}
+
+  .wrap{max-width:1140px;margin:0 auto;padding:34px 26px 90px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted2)}
+  .eyebrow .d{width:6px;height:6px;border-radius:50%;background:var(--ember)}
+  h1.title{font-family:var(--display);font-weight:500;font-size:38px;letter-spacing:-.02em;color:var(--ink);margin-top:11px;line-height:1.05}
+  .lede{font-size:15px;color:var(--muted);margin-top:9px;max-width:620px;line-height:1.55}
+  .persp{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:12.5px;color:var(--ink-soft);background:var(--card);box-shadow:var(--inset2);border-radius:99px;padding:6px 13px}
+  .persp b{color:var(--ink)}
+
+  /* where are you today */
+  .whereRow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+  .seg{display:inline-flex;background:var(--card);border-radius:11px;padding:4px;gap:3px;box-shadow:var(--inset2)}
+  .seg button{border:0;background:transparent;font-family:var(--font);font-size:12.5px;font-weight:600;color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .15s}
+  .seg button.on{background:var(--ink);color:#fff}
+  .whereRow .q{font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+
+  /* pricing ledger */
+  .ledger{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:20px 0 6px;background:var(--card);border-radius:14px;box-shadow:var(--inset2);overflow:hidden}
+  .ledger .li{display:flex;flex-direction:column;gap:2px;padding:13px 18px;border-right:1px solid var(--border);min-width:150px}
+  .ledger .li:last-child{border-right:0;margin-left:auto;background:var(--panel)}
+  .ledger .lk{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted2)}
+  .ledger .lv{font-family:var(--display);font-size:18px;color:var(--ink);line-height:1.1}
+  .ledger .lv.off{color:var(--muted2)}
+  .ledger .ls{font-size:11px;color:var(--muted)}
+  .ledger .lv .tot{font-size:13px;color:var(--muted);font-family:var(--font)}
+
+  /* arc */
+  .arc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:26px;align-items:stretch}
+  @media (max-width:940px){.arc{grid-template-columns:1fr}}
+  .stagecol{display:flex;flex-direction:column;min-width:0}
+  .seamlbl{font-size:11px;color:var(--muted);line-height:1.45;padding:10px 16px;display:flex;align-items:center;gap:9px}
+  .seamlbl .ar{flex:none;color:var(--border2)}
+  @media (max-width:940px){.seamlbl{padding:6px 16px}}
+
+  .stage{position:relative;background:var(--card);border-radius:18px;box-shadow:var(--inset2);padding:20px;display:flex;flex-direction:column;height:100%;transition:box-shadow .2s,transform .15s;margin:0 7px}
+  .stage.rec{box-shadow:0 0 0 1.6px var(--ember) inset,0 12px 30px -14px rgba(255,62,0,.4)}
+  .stage.live{box-shadow:0 0 0 1.5px var(--green) inset}
+  .stage .recflag{position:absolute;top:-10px;left:20px;background:var(--ember);color:#fff;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:3px 10px;box-shadow:var(--pop)}
+  .sh{display:flex;align-items:center;gap:10px}
+  .snum{width:30px;height:30px;border-radius:9px;background:var(--panel);color:var(--ink-soft);display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:600;flex:none}
+  .stage.live .snum{background:var(--green-soft);color:var(--green-deep)}
+  .stage.rec .snum{background:var(--ember-soft);color:var(--ember-deep)}
+  .persptag{font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:99px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px}
+  .persptag.zor{color:var(--ink-soft);background:var(--stone)}
+  .persptag.zee{color:var(--blue);background:var(--blue-soft)}
+  .sname{font-family:var(--display);font-size:20px;font-weight:550;color:var(--ink);margin-top:13px;letter-spacing:-.01em}
+  .sprice{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .sguide{font-size:13px;color:var(--body);line-height:1.5;margin-top:12px}
+  .milestone{display:flex;gap:9px;align-items:flex-start;margin-top:14px;background:var(--panel);border-radius:11px;padding:11px 13px}
+  .milestone .fl{color:var(--amber);flex:none;margin-top:1px}
+  .milestone.done .fl{color:var(--green)}
+  .milestone .mt{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted2)}
+  .milestone .mv{font-size:12.5px;font-weight:600;color:var(--ink);margin-top:2px;line-height:1.4}
+  .substeps{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+  .substep{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;box-shadow:var(--inset2);cursor:pointer;transition:all .14s;background:var(--card)}
+  .substep:hover{box-shadow:var(--inset2),0 6px 14px -8px rgba(19,18,16,.25);transform:translateX(2px)}
+  .substep .si{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none;background:var(--panel);color:var(--muted)}
+  .substep .sl{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .substep .sd{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .substep .sc{margin-left:auto;color:var(--muted2)}
+  .substep .persptag{margin-left:auto}
+  .statuschip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:99px;padding:4px 10px;margin-top:14px;align-self:flex-start}
+  .statuschip.available{color:var(--muted2);background:var(--panel)}
+  .statuschip.in_progress{color:var(--amber);background:var(--amber-soft)}
+  .statuschip.live{color:var(--green-deep);background:var(--green-soft)}
+  .statuschip .b{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .grow{flex:1}
+  .cta{margin-top:16px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--font);font-size:13.5px;font-weight:600;border:0;border-radius:999px;cursor:pointer;padding:11px 17px;transition:transform .1s,background .15s;width:100%}
+  .btn:active{transform:scale(.99)}
+  .btn--dark{background:var(--ink);color:#fff}.btn--dark:hover{background:#2e2c28}
+  .btn--green{background:var(--green);color:#fff}.btn--green:hover{background:#009039}
+  .btn--ghost{background:transparent;color:var(--ink-soft);box-shadow:var(--inset2)}.btn--ghost:hover{background:var(--panel)}
+
+  .footnote{font-size:12px;color:var(--muted);line-height:1.55;margin-top:26px;display:flex;gap:9px;max-width:760px}
+  .footnote .ic{color:var(--violet);flex:none;margin-top:1px}
+
+  /* celebrate banner */
+  .celebrate{display:none;align-items:center;gap:13px;background:var(--green-soft);border-radius:14px;padding:14px 18px;margin-bottom:20px;animation:drop .4s var(--spring)}
+  .celebrate.on{display:flex}
+  @keyframes drop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  .celebrate .ck{width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;flex:none}
+  .celebrate .ct{font-size:14px;font-weight:700;color:var(--green-deep)}
+  .celebrate .cd{font-size:12.5px;color:var(--ink-soft);margin-top:1px}
+  .celebrate .nextbtn{margin-left:auto;flex:none}
+
+  .reflink{background:none;border:0;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .reflink:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-panda" viewBox="0 0 26 26"><rect width="26" height="26" rx="8" fill="#131210"/><circle cx="9.7" cy="13.3" r="1.5" fill="#fff"/><circle cx="16.3" cy="13.3" r="1.5" fill="#fff"/><path d="M10.5 17.2c.9 1 3.1 1 4 0" stroke="#fff" stroke-width="1.4" fill="none"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l1.9 5.7L20 9.6l-5.6 2.3L12 18l-2.4-6.1L4 9.6l6.1-1.9z"/></symbol>
+  <symbol id="i-store" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M4 9v11h16V9M4 9h16M9 20v-6h6v6"/></symbol>
+  <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v-4M12 17V8M17 13v-3"/></symbol>
+  <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+</svg>
+
+<div id="bar">
+  <span class="brand"><svg width="22" height="22" viewBox="0 0 26 26"><use href="#i-panda"/></svg> coverpanda</span>
+  <span class="tag">adoption journey</span>
+  <span class="sp"></span>
+  <button onclick="resetJourney()">↺ Reset journey</button>
+</div>
+
+<div class="wrap">
+  <div id="celebrate" class="celebrate"></div>
+
+  <span class="eyebrow"><span class="d"></span> Land · Expand · Full</span>
+  <h1 class="title">Your path to full adoption.</h1>
+  <p class="lede">Three stages, one platform. Land with self-serve Lite, expand with the Launch Agent as you grow, and go Full when you want the whole network in one number. Add the upgrades in any order — here's where you are.</p>
+  <div class="persp"><svg class="ic ic--s"><use href="#i-store"/></svg> You are the <b>franchise brand</b>. One stage shows your <b>franchisee's</b> side — it's flagged.</div>
+
+  <div class="whereRow">
+    <span class="q">Where are you today?</span>
+    <div class="seg" id="modeSeg">
+      <button data-mode="new" onclick="setMode('new')">I'm new to CoverPanda</button>
+      <button data-mode="existing" onclick="setMode('existing')">I already collect royalties</button>
+    </div>
+  </div>
+
+  <div class="ledger" id="ledger"></div>
+
+  <div class="arc" id="arc"></div>
+
+  <div class="footnote"><svg class="ic"><use href="#i-spark"/></svg>
+    <span><b>The seam that makes this one platform:</b> every franchisee the Launch Agent signs connects their QuickBooks during onboarding — and that exact connection lights their unit up inside your Financial OS. Connect once; it appears everywhere. Nothing is re-entered, and nothing here is locked — Expand and Full are independent upgrades you can add whenever the timing's right.</span>
+  </div>
+</div>
+
+<script>
+const KEY='cp_journey';
+const URLS={
+  land:'CoverPanda Sign-Up/revamped-signup-prototype.html',
+  gallery:'Launch Agent/vendor-stack-builder-prototype.html',
+  agent:'Launch Agent/launch-agent-prototype.html',
+  canvas:'Launch Agent/connectivity-prototype.html',
+  full:'Launch Agent/financial-os-prototype.html',
+};
+function read(){ try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};} }
+function write(s){ try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){} }
+function st(stage){ const s=read(); return s[stage]||'available'; }
+function setSt(stage,v){ const s=read(); s[stage]=v; write(s); }
+function go(stage){ const s=read(); if(s[stage]!=='live') s[stage]='in_progress'; write(s); location.href=encodeURI(URLS[stage]); }
+
+function setMode(m){
+  const s=read(); s.mode=m;
+  if(m==='existing' && s.land!=='live') s.land='live';
+  if(m==='new' && s.land==='live' && !s._touchedLand) s.land='available';
+  write(s); render();
+}
+
+function recommended(){
+  const s=read();
+  if(s.land!=='live') return 'land';
+  if(s.expand!=='live') return 'expand';
+  if(s.full!=='live') return 'full';
+  return null;
+}
+
+const STAGES=[
+  { id:'land', num:'1', persp:'zor', perspLabel:'You · brand', name:'Land — Lite / Starter', price:'$99/mo + $20/live unit · 30-day trial',
+    guide:'Set up your brand workspace, send your first agreement, and schedule your first royalty invoice. ~3 minutes.',
+    milestone:'First royalty invoice scheduled — collection is live.',
+    enter:()=>go('land'), cta:'Open the Lite signup' },
+  { id:'expand', num:'2', persp:'zor', perspLabel:'You · brand', name:'Expand — Launch Agent', price:'$750 per signed franchisee · add anytime',
+    guide:'Publish your launch system and the agent closes + onboards every candidate for you — you approve, it runs.',
+    milestone:'First franchisee signed and their unit is coming online.',
+    substeps:[
+      { id:'gallery', icn:'i-store', l:'Curate your vendor marketplace', d:'Pick who fills each service category', persp:'zor' },
+      { id:'agent', icn:'i-rocket', l:'Close & onboard a franchisee', d:'Publish the launch system; the agent runs it', persp:'zor' },
+      { id:'canvas', icn:'i-spark', l:'Watch a unit come online', d:"Your franchisee's side — connections light up", persp:'zee' },
+    ] },
+  { id:'full', num:'3', persp:'zor', perspLabel:'You · brand', name:'Full — Financial OS', price:'+$150/mo → $249/mo total · same $20/unit',
+    guide:"Connect your units' QuickBooks, watch your network come online, and send the board-ready report — drafted for you.",
+    milestone:'Network consolidated P&L live → first CFO report sent.',
+    enter:()=>go('full'), cta:'Open the Financial OS' },
+];
+
+const SEAMS={
+  expand:'Collecting royalties? The Launch Agent fills your pipeline — close & onboard the next franchisee for you.',
+  full:'Every unit the agent opens connects its books during onboarding — Full turns those into one consolidated P&L.',
+};
+
+function ic(id,c){ return `<svg class="ic ${c||''}"><use href="#${id}"/></svg>`; }
+
+function render(){
+  const rec=recommended();
+  // pricing ledger
+  const liveLand=st('land')==='live', liveExpand=st('expand')==='live', liveFull=st('full')==='live';
+  const monthly = (liveLand?99:0) + (liveFull?150:0);
+  document.getElementById('ledger').innerHTML = `
+    <div class="li"><span class="lk">Land · Lite</span><span class="lv ${liveLand?'':'off'}">$99<span class="tot">/mo</span></span><span class="ls">${liveLand?'active':'+ $20 / live unit'}</span></div>
+    <div class="li"><span class="lk">Expand · Launch Agent</span><span class="lv ${liveExpand?'':'off'}">$750</span><span class="ls">per signed franchisee${liveExpand?' · active':''}</span></div>
+    <div class="li"><span class="lk">Full · Financial OS</span><span class="lv ${liveFull?'':'off'}">+$150<span class="tot">/mo</span></span><span class="ls">${liveFull?'active':'when you upgrade'}</span></div>
+    <div class="li"><span class="lk">Your monthly today</span><span class="lv">${monthly?('$'+monthly):'$0'}<span class="tot">/mo</span></span><span class="ls">${liveExpand?'+ $750 per new signing':'recurring'}</span></div>`;
+
+  // mode segmented
+  const mode=read().mode;
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on', b.dataset.mode===mode));
+
+  // arc
+  document.getElementById('arc').innerHTML = STAGES.map((s,i)=>{
+    const status=st(s.id);
+    const isRec = rec===s.id;
+    const seam = i>0 ? `<div class="seamlbl"><svg class="ic ar"><use href="#i-arrow-r"/></svg> ${SEAMS[s.id]||''}</div>` : `<div class="seamlbl"></div>`;
+    const chip = `<span class="statuschip ${status}"><span class="b"></span>${status==='live'?'Live ✓':status==='in_progress'?'In progress':'Available'}</span>`;
+    const ms = `<div class="milestone ${status==='live'?'done':''}"><svg class="ic fl"><use href="#i-flag"/></svg><div><div class="mt">Ideal end state</div><div class="mv">${s.milestone}</div></div></div>`;
+    let body;
+    if(s.substeps){
+      body = `<div class="substeps">${s.substeps.map(ss=>`
+        <div class="substep" onclick="go('${ss.id}')">
+          <span class="si">${ic(ss.icn,'ic--s')}</span>
+          <div style="min-width:0"><div class="sl">${ss.l}</div><div class="sd">${ss.d}</div></div>
+          <span class="persptag ${ss.persp}">${ss.persp==='zee'?'🧑 Franchisee':'🏢 You'}</span>
+        </div>`).join('')}</div>
+        <div class="grow"></div>${chip}`;
+    } else {
+      const label = status==='live' ? (s.cta+' again') : s.cta;
+      body = `<div class="grow"></div>${chip}<div class="cta"><button class="btn ${status==='live'?'btn--ghost':isRec?'btn--dark':'btn--ghost'}" onclick="${s.id==='land'?'go(\'land\')':'go(\''+s.id+'\')'}">${status==='live'?ic('i-check','ic--s'):''}${label} ${status==='live'?'':ic('i-arrow','ic--s')}</button></div>`;
+    }
+    return `<div class="stagecol">
+      ${seam}
+      <div class="stage ${isRec?'rec':''} ${status==='live'?'live':''}">
+        ${isRec?'<span class="recflag">Recommended next</span>':''}
+        <div class="sh"><span class="snum">${s.num}</span><span class="persptag ${s.persp}">🏢 ${s.perspLabel}</span></div>
+        <div class="sname">${s.name}</div>
+        <div class="sprice">${s.price}</div>
+        <div class="sguide">${s.guide}</div>
+        ${ms}
+        ${body}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// celebrate on return from a completed stage
+function celebrate(stage){
+  const map={ land:['Lite is live.','Your Starter workspace and royalty system are built — collection is ready to switch on. Ready to grow your network?'],
+    gallery:['Marketplace published.','Your vendor stack is live for every franchisee. Next: publish your launch system.'],
+    agent:['Launch system live.','The agent is closing & onboarding for you. See it from your franchisee\'s side, or go Full.'],
+    canvas:['Unit coming online.','That\'s the connectivity your franchisee feels. These connections feed your Financial OS.'],
+    expand:['Expand is live.','Your first franchisee is signed and onboarding. Their unit will roll into your Financial OS.'],
+    full:['Full adoption reached. 🎉','Your network rolls up into one P&L and the board report drafts itself. You\'ve completed the journey.'] };
+  const c=map[stage]; if(!c) return;
+  // a sub-step completion marks the parent 'expand' in_progress (not fully live until agent milestone)
+  if(stage==='gallery'||stage==='canvas'){ if(st('expand')!=='live') setSt('expand','in_progress'); }
+  if(stage==='agent'||stage==='expand'){ setSt('expand','live'); }
+  const el=document.getElementById('celebrate');
+  const rec=recommended();
+  const nextBtn = rec ? `<button class="btn btn--green nextbtn" style="width:auto" onclick="go('${rec}')">Continue to ${rec==='land'?'Land':rec==='expand'?'Expand':'Full'} ${ic('i-arrow','ic--s')}</button>` : '';
+  el.innerHTML = `<div class="ck">${ic('i-check','ic--l')}</div><div><div class="ct">${c[0]}</div><div class="cd">${c[1]}</div></div>${nextBtn}`;
+  el.classList.add('on');
+}
+
+function resetJourney(){ try{localStorage.removeItem(KEY);}catch(e){} document.getElementById('celebrate').classList.remove('on'); render(); }
+
+// init
+(function(){
+  const params=new URLSearchParams(location.search);
+  const done=params.get('done');
+  if(done){ setSt(done==='gallery'||done==='canvas'||done==='agent'?done:done,'live'); celebrate(done); history.replaceState({},'',location.pathname); }
+  render();
+})();
+</script>
+</body>
+</html>

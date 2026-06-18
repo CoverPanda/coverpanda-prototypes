@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CoverPanda — Launch Agent (Prototype v2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,650&family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="../journey-nav.js"></script>
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --panel: #f6f4f0;
+    --stone: #efece6;
+    --border: #e8e4dc;
+    --border-2: #ddd7cd;
+    --card: #ffffff;
+    --ink: #131210;
+    --ink-soft: #36342f;
+    --body: #4a4842;
+    --muted: #6e6b63;
+    --muted-2: #8a867c;
+    --ember: #ff3e00;
+    --ember-soft: #ffece4;
+    --ember-deep: #c93100;
+    --green: #00a843;
+    --green-soft: #e3f6ea;
+    --green-deep: #00702e;
+    --blue: #0084ec;
+    --blue-soft: #e6f2fd;
+    --amber: #a87a08;
+    --amber-soft: #faf2dd;
+    --violet: #6e56e8;
+    --violet-soft: #efecfd;
+    --font: 'Instrument Sans', -apple-system, sans-serif;
+    --display: 'Fraunces', Georgia, serif;
+    --mono: 'Spline Sans Mono', ui-monospace, monospace;
+    --r-card: 18px;
+    --r-input: 10px;
+    --inset: #efece6 0 0 0 1px inset;
+    --inset-2: #e8e4dc 0 0 0 1px inset;
+    --pop: 0 1px 2px rgba(19,18,16,.05), 0 8px 28px rgba(19,18,16,.09);
+    --pop-lg: 0 2px 6px rgba(19,18,16,.07), 0 24px 64px rgba(19,18,16,.16);
+    --spring: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: var(--font); color: var(--body); background: var(--bg); -webkit-font-smoothing: antialiased; letter-spacing: -0.008em; font-size: 14px; }
+  ::selection { background: #ffd9c7; }
+
+  .ic { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .ic--s { width: 13px; height: 13px; } .ic--l { width: 20px; height: 20px; }
+
+  .av { display: inline-grid; place-items: center; border-radius: 50%; font-weight: 700; color: #fff; flex: none; letter-spacing: 0; }
+  .av--24 { width: 24px; height: 24px; font-size: 10px; }
+  .av--30 { width: 30px; height: 30px; font-size: 12px; }
+  .av--38 { width: 38px; height: 38px; font-size: 14px; }
+
+  #protobar { position: fixed; top: 0; left: 0; right: 0; height: 42px; z-index: 1200;
+    background: #141312; color: #fff; display: flex; align-items: center; gap: 13px; padding: 0 14px; font-size: 12.5px;
+    border-bottom: 1px solid #2a2825; }
+  #protobar .pb-tag { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 10.5px; color: #d8d4cc; }
+  #protobar .pb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ember); }
+  #protobar .pb-spacer { flex: 1; }
+  #protobar select { background: #211f1d; color: #fff; border: 1px solid #3a3733; border-radius: 7px; padding: 5px 9px; font-family: var(--font); font-size: 12px; outline: none; cursor: pointer; max-width: 340px; }
+  #protobar button { background: #fff; color: #141312; border: 0; border-radius: 7px; padding: 6px 13px; font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; }
+  #protobar .pb-step { color: #999590; font-family: var(--mono); font-size: 11px; }
+  #protobar .pb-step b { color: #fff; font-weight: 600; }
+
+  .stage { padding-top: 42px; min-height: 100vh; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .screen.active .rv { opacity: 0; transform: translateY(10px); animation: rise .5s var(--spring) forwards; }
+  .screen.active .rv:nth-child(1) { animation-delay: .02s } .screen.active .rv:nth-child(2) { animation-delay: .07s }
+  .screen.active .rv:nth-child(3) { animation-delay: .12s } .screen.active .rv:nth-child(4) { animation-delay: .17s }
+  .screen.active .rv:nth-child(5) { animation-delay: .22s } .screen.active .rv:nth-child(6) { animation-delay: .27s }
+  .screen.active .rv:nth-child(7) { animation-delay: .32s } .screen.active .rv:nth-child(8) { animation-delay: .37s }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    font-family: var(--font); font-size: 13.5px; font-weight: 600; letter-spacing: -0.005em;
+    border: 0; border-radius: 999px; cursor: pointer; padding: 10px 17px;
+    transition: transform .1s ease, background .15s ease, box-shadow .15s ease; text-decoration: none; white-space: nowrap; }
+  .btn:active { transform: scale(.98); }
+  .btn--dark { background: var(--ink); color: #fff; }
+  .btn--dark:hover { background: #2e2c28; }
+  .btn--light { background: var(--stone); color: var(--ink); }
+  .btn--light:hover { background: #e7e3da; }
+  .btn--ghost { background: transparent; color: var(--ink-soft); box-shadow: var(--inset-2); }
+  .btn--ghost:hover { background: var(--panel); }
+  .btn--green { background: var(--green); color: #fff; }
+  .btn--green:hover { background: #009039; }
+  .btn--lg { padding: 13px 24px; font-size: 14.5px; }
+  .btn--sm { padding: 7px 13px; font-size: 12.5px; }
+  .btn--block { width: 100%; display: flex; }
+  .link { color: var(--ember-deep); font-weight: 600; cursor: pointer; text-decoration: none; }
+  .link:hover { text-decoration: underline; }
+  .mlink { color: var(--muted); cursor: pointer; font-size: 13px; background: none; border: 0; font-family: var(--font); }
+  .mlink:hover { color: var(--ink); }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 44px 32px 90px; }
+  .wrap--narrow { max-width: 760px; }
+  h1.display { font-family: var(--display); font-weight: 500; font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); }
+  .sub { font-size: 15px; color: var(--muted); line-height: 1.6; margin-top: 12px; }
+  .card { background: var(--card); border-radius: var(--r-card); box-shadow: var(--inset); padding: 24px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted-2); }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ember); }
+  .chip { display: inline-flex; align-items: center; gap: 7px; background: var(--card); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); box-shadow: var(--inset-2); }
+  .seclab { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-2); }
+  .mono { font-family: var(--mono); font-size: .92em; letter-spacing: 0; }
+
+  .panda { display: flex; gap: 13px; align-items: flex-start; }
+  .panda__av { flex: none; width: 36px; height: 36px; border-radius: 12px; background: var(--ink); display: grid; place-items: center; position: relative; }
+  .panda__av::after { content: ""; position: absolute; right: -2px; bottom: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--green); border: 2px solid var(--bg); }
+  .panda__bubble { background: var(--card); border-radius: 4px 16px 16px 16px; box-shadow: var(--inset), var(--pop); padding: 15px 18px; font-size: 14px; line-height: 1.6; color: var(--body); }
+  .panda__bubble b { color: var(--ink); }
+  .panda__name { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 6px; display: flex; align-items: center; gap: 7px; }
+  .typing-caret { display: inline-block; width: 2px; height: 14px; background: var(--ink); margin-left: 1px; vertical-align: -2px; animation: blink .9s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .ob__top { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; }
+  .logo { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; }
+  .ob__steps { display: flex; gap: 5px; align-items: center; }
+  .ob__steps .st { width: 30px; height: 4px; border-radius: 99px; background: var(--stone); transition: background .3s; }
+  .ob__steps .st.on { background: var(--ink); }
+  .save-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .save-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+  .qa-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .qa-chip { display: inline-flex; align-items: center; gap: 7px; border: 0; box-shadow: var(--inset-2); background: var(--card); border-radius: 999px; padding: 9px 15px; font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: var(--font); transition: all .15s ease; }
+  .qa-chip:hover { box-shadow: #b9b3a7 0 0 0 1px inset; }
+  .qa-chip .ck { width: 15px; height: 15px; border-radius: 50%; display: grid; place-items: center; background: var(--stone); transition: all .15s; }
+  .qa-chip .ck .ic { width: 9px; height: 9px; stroke-width: 3.4; opacity: 0; stroke: #fff; }
+  .qa-chip.sel { background: var(--ink); color: #fff; box-shadow: none; }
+  .qa-chip.sel .ck { background: var(--green); }
+  .qa-chip.sel .ck .ic { opacity: 1; }
+
+  .dstep { display: flex; align-items: center; gap: 13px; padding: 13px 15px; border-radius: 13px; background: var(--card); box-shadow: var(--inset-2); margin-bottom: 7px; cursor: pointer; transition: box-shadow .15s, transform .15s; }
+  .dstep:hover { box-shadow: var(--inset-2), var(--pop); transform: translateY(-1px); }
+  .dstep:hover .dstep-edit { opacity: 1; }
+  .dstep .n { flex: none; width: 26px; height: 26px; border-radius: 9px; background: var(--panel); display: grid; place-items: center; font-size: 11.5px; font-weight: 700; color: var(--muted); font-family: var(--mono); }
+  .dstep .dmain { min-width: 0; }
+  .dstep .t { font-size: 13.5px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .dstep .d { font-size: 12.5px; color: var(--muted); margin-top: 2px; line-height: 1.45; }
+  .dstep .dstep-edit { margin-left: auto; opacity: 0; transition: opacity .15s; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--muted); flex: none; }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3.5px 8px; border-radius: 99px; white-space: nowrap; flex: none; }
+  .tag--auto { background: var(--violet-soft); color: var(--violet); }
+  .tag--gate { background: var(--amber-soft); color: var(--amber); }
+  .tag--svc  { background: var(--green-soft); color: var(--green-deep); }
+  .tag--you  { background: var(--ember-soft); color: var(--ember-deep); }
+  .dstep.is-new { animation: flashIn 1s var(--spring); }
+  @keyframes flashIn { 0% { background: var(--amber-soft); transform: scale(.985); } 100% { background: var(--card); } }
+
+  .phase { background: var(--card); border-radius: 15px; box-shadow: var(--inset-2); margin-bottom: 8px; overflow: hidden; }
+  .phase .ph-head { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 15px 17px; }
+  .phase .ph-head:hover { background: #fdfcfa; }
+  .phase .ph-n { flex: none; width: 28px; height: 28px; border-radius: 9px; background: var(--panel); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--ink-soft); font-family: var(--mono); }
+  .phase .ph-t { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .phase .ph-meta { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .phase .ph-week { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--muted-2); white-space: nowrap; font-family: var(--mono); background: var(--panel); padding: 4px 9px; border-radius: 7px; flex: none; }
+  .phase .ph-chev { color: var(--muted-2); transition: transform .25s var(--spring); flex: none; }
+  .phase.open .ph-chev { transform: rotate(90deg); }
+  .phase .ph-body { display: none; padding: 2px 17px 13px 57px; }
+  .phase.open .ph-body { display: block; }
+  .ptask { display: flex; align-items: center; gap: 10px; padding: 7.5px 9px; font-size: 13px; color: var(--body); border-radius: 9px; cursor: pointer; }
+  .ptask:hover { background: var(--panel); }
+  .ptask .bx { width: 15px; height: 15px; border-radius: 5px; box-shadow: #c9c3b8 0 0 0 1.5px inset; flex: none; }
+  .ptask .pt-t { min-width: 0; }
+  .ptask .svc-pill { font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 99px; background: var(--green-soft); color: var(--green-deep); white-space: nowrap; flex: none; }
+  .ptask .wk { margin-left: auto; font-family: var(--mono); font-size: 10.5px; color: var(--muted-2); flex: none; }
+
+  .bench { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 11px; margin-top: 16px; }
+  .vendor { background: var(--card); border-radius: 16px; box-shadow: var(--inset); padding: 18px 19px; position: relative; transition: box-shadow .15s, opacity .25s, transform .25s; }
+  .vendor:hover { box-shadow: var(--inset), var(--pop); }
+  .vendor.off { opacity: .45; transform: scale(.985); }
+  .vendor .v-ic { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 10px; }
+  .vendor h3 { font-size: 14.5px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+  .vendor .v-d { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-top: 4px; }
+  .vendor .v-when { font-size: 11.5px; color: var(--muted-2); margin-top: 9px; display: flex; align-items: center; gap: 6px; }
+  .vendor .v-when b { color: var(--ink-soft); font-weight: 600; }
+  .vendor .v-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 8px; }
+  .vendor .v-live { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--green-deep); display: inline-flex; gap: 5px; align-items: center; }
+  .vendor .v-live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .vendor .v-badge { position: absolute; top: 13px; right: 15px; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--green-deep); background: var(--green-soft); padding: 3.5px 8px; border-radius: 99px; }
+  .vendor .v-swap { font-size: 11.5px; color: var(--muted); cursor: pointer; background: none; border: 0; font-family: var(--font); }
+  .vendor .v-swap:hover { color: var(--ink); text-decoration: underline; }
+
+  .app { display: flex; min-height: calc(100vh - 42px); }
+  .app__side { width: 222px; flex: none; background: var(--panel); border-right: 1px solid var(--border); padding: 14px 11px 12px; display: flex; flex-direction: column; }
+  @media (max-width: 860px) { .app__side { display: none; } }
+  .ws-switch { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 10px; background: var(--card); box-shadow: var(--inset-2); margin-bottom: 7px; cursor: pointer; }
+  .ws-switch .wsq { width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(135deg, #1fae54, #0b7a37); color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 800; }
+  .ws-switch .nm { font-size: 12.5px; font-weight: 600; color: var(--ink); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .srch { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 9px; color: var(--muted-2); font-size: 12.5px; cursor: pointer; margin-bottom: 6px; }
+  .srch:hover { background: #edeae3; }
+  .srch .kbd { margin-left: auto; font-family: var(--mono); font-size: 10px; background: var(--card); box-shadow: var(--inset-2); border-radius: 5px; padding: 2px 5px; color: var(--muted); }
+  .snav { list-style: none; }
+  .snav .lab { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-2); padding: 13px 9px 5px; }
+  .snav a { display: flex; align-items: center; gap: 9px; padding: 6.5px 9px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--body); text-decoration: none; cursor: pointer; }
+  .snav a:hover { background: #edeae3; }
+  .snav a.on { background: #e9e5dd; color: var(--ink); font-weight: 600; }
+  .snav a .ic { color: var(--muted); }
+  .snav a.on .ic { color: var(--ink); }
+  .snav .badge { margin-left: auto; background: var(--ember); color: #fff; font-size: 10px; font-weight: 700; border-radius: 99px; padding: 1.5px 6.5px; font-family: var(--mono); }
+  .side-foot { margin-top: auto; display: flex; align-items: center; gap: 9px; padding: 10px 9px 2px; border-top: 1px solid var(--border); }
+  .side-foot .nm { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  .side-foot .em { font-size: 10.5px; color: var(--muted-2); }
+  .app__main { flex: 1; padding: 26px 34px 80px; max-width: 1180px; min-width: 0; }
+  .main-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+  .main-head h1 { font-family: var(--display); font-weight: 500; font-size: 25px; letter-spacing: -0.01em; color: var(--ink); }
+  .main-head .sub { margin-top: 4px; font-size: 13.5px; }
+  .agent-status { display: inline-flex; align-items: center; gap: 8px; background: var(--card); border-radius: 999px; padding: 8px 14px; box-shadow: var(--inset); font-size: 12.5px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+  .agent-status .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,168,67,.35); } 50% { box-shadow: 0 0 0 6px rgba(0,168,67,0); } }
+
+  .grid2 { display: grid; grid-template-columns: minmax(0,1fr) 330px; gap: 16px; align-items: start; }
+  @media (max-width: 1020px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .mrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; margin-bottom: 18px; }
+  @media (max-width: 1020px) { .mrow { grid-template-columns: 1fr 1fr; } }
+  .met { background: var(--card); border-radius: 14px; box-shadow: var(--inset); padding: 14px 16px; position: relative; overflow: hidden; }
+  .met .m-l { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); }
+  .met .m-v { font-family: var(--display); font-size: 25px; font-weight: 500; color: var(--ink); margin-top: 6px; }
+  .met .m-v small { font-size: 13px; font-family: var(--font); color: var(--muted); font-weight: 500; }
+  .met .m-d { font-size: 11.5px; font-weight: 600; color: var(--green-deep); margin-top: 4px; display: flex; align-items: center; gap: 5px; }
+  .met .m-d.neutral { color: var(--muted); }
+  .met .spark { position: absolute; right: 12px; top: 16px; opacity: .9; }
+
+  .appr { background: var(--card); border-radius: 15px; box-shadow: var(--inset); padding: 16px 18px; margin-bottom: 10px; transition: all .35s var(--spring); position: relative; }
+  .appr .a-head { display: flex; align-items: center; gap: 11px; }
+  .appr .a-ic { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; flex: none; }
+  .appr .a-t { font-size: 14px; font-weight: 650; color: var(--ink); }
+  .appr .a-who { font-size: 12px; color: var(--muted); margin-top: 1px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .appr .a-body { font-size: 13px; color: var(--body); line-height: 1.55; margin: 11px 0 12px; padding: 11px 13px; background: var(--panel); border-radius: 11px; }
+  .appr .a-body b { color: var(--ink); }
+  .appr .a-actions { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+  .appr .a-gate { margin-left: auto; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--amber); background: var(--amber-soft); padding: 4px 9px; border-radius: 99px; white-space: nowrap; flex: none; }
+  .appr.resolved { opacity: .55; }
+  .appr.resolved .a-body { display: none; }
+  .appr.held { box-shadow: var(--amber) 0 0 0 1.5px inset; }
+
+  .feed { background: var(--card); border-radius: 15px; box-shadow: var(--inset); padding: 16px 18px; }
+  .feed h3 { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .fd { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f5f2ec; }
+  .fd:last-child { border-bottom: 0; }
+  .fd .fd-ic { flex: none; width: 26px; height: 26px; border-radius: 8px; background: var(--panel); display: grid; place-items: center; color: var(--muted); }
+  .fd .fd-tx { font-size: 12.5px; line-height: 1.5; color: var(--body); }
+  .fd .fd-tx b { color: var(--ink); font-weight: 600; }
+  .fd .fd-tm { font-size: 10.5px; color: var(--muted-2); margin-top: 2px; font-family: var(--mono); }
+
+  .pstrip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  @media (max-width: 1020px) { .pstrip { grid-template-columns: 1fr 1fr; } }
+  .pcol { background: var(--panel); border-radius: 13px; padding: 11px 12px; }
+  .pcol .pc-h { display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 8px; padding: 0 2px; }
+  .pcard { background: var(--card); border-radius: 11px; box-shadow: var(--inset-2); padding: 11px 12px; margin-bottom: 7px; cursor: pointer; transition: transform .12s ease, box-shadow .12s; }
+  .pcard:hover { transform: translateY(-2px); box-shadow: var(--inset-2), var(--pop); }
+  .pcard .pc-top { display: flex; align-items: center; gap: 8px; }
+  .pcard .pc-n { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .pcard .pc-s { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .pcard .pc-agent { display: flex; align-items: center; gap: 6px; margin-top: 9px; font-size: 11px; font-weight: 600; }
+  .pcard .pc-agent .pd { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+  .pcard .pc-agent.ok { color: var(--green-deep); } .pcard .pc-agent.ok .pd { background: var(--green); }
+  .pcard .pc-agent.wait { color: var(--amber); } .pcard .pc-agent.wait .pd { background: var(--amber); }
+  .pcard .pc-agent.you { color: var(--ember-deep); } .pcard .pc-agent.you .pd { background: var(--ember); }
+
+  .tl { position: relative; padding-left: 32px; }
+  .tl::before { content: ""; position: absolute; left: 10px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+  .tl-it { position: relative; padding: 10px 0; }
+  .tl-it::before { content: ""; position: absolute; left: -28px; top: 15px; width: 13px; height: 13px; border-radius: 50%; background: var(--card); border: 3px solid #c6c0b4; }
+  .tl-it.done::before { border-color: var(--green); background: var(--green); }
+  .tl-it.agent::before { border-color: var(--violet); }
+  .tl-it.now::before { border-color: var(--ember); animation: pulse 1.8s infinite; }
+  .tl-it .t { font-size: 13.5px; font-weight: 650; color: var(--ink); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tl-it .d { font-size: 12.5px; color: var(--muted); margin-top: 2px; line-height: 1.55; max-width: 600px; }
+  .tl-it .tm { font-size: 10.5px; color: var(--muted-2); margin-top: 3px; font-family: var(--mono); }
+
+  .svcrow { display: flex; gap: 12px; align-items: center; background: var(--card); border-radius: 12px; box-shadow: #cdeeda 0 0 0 1.5px inset; padding: 11px 14px; margin-top: 8px; max-width: 600px; }
+  .svcrow .s-ic { width: 30px; height: 30px; border-radius: 9px; background: var(--green-soft); display: grid; place-items: center; color: var(--green-deep); flex: none; }
+  .svcrow .s-t { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .svcrow .s-d { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .svcrow .s-st { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--green-deep); white-space: nowrap; flex: none; }
+
+  .hint { display: flex; gap: 10px; font-size: 12.5px; color: var(--muted); line-height: 1.6; background: var(--panel); border-radius: 12px; padding: 12px 15px; margin-top: 14px; align-items: flex-start; }
+  .hint .ic { margin-top: 2px; color: var(--muted-2); }
+  .hint b { color: var(--ink-soft); }
+
+  .scrim { position: fixed; inset: 0; background: rgba(19,18,16,.32); backdrop-filter: blur(2px); z-index: 1300; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .scrim.on { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 460px; max-width: 94vw; background: var(--bg); z-index: 1310; box-shadow: var(--pop-lg); transform: translateX(105%); transition: transform .35s var(--spring); display: flex; flex-direction: column; }
+  .drawer.on { transform: none; }
+  .drawer__head { display: flex; align-items: center; gap: 11px; padding: 18px 22px 14px; border-bottom: 1px solid var(--border); }
+  .drawer__head .dt { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .drawer__head .ds { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .drawer__head .x { margin-left: auto; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; color: var(--muted); flex: none; }
+  .drawer__head .x:hover { background: var(--stone); color: var(--ink); }
+  .drawer__body { flex: 1; overflow-y: auto; padding: 20px 22px; }
+  .drawer__foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 9px; align-items: center; background: var(--bg); }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 650; margin-bottom: 6px; color: var(--ink-soft); }
+  .input, .ta { width: 100%; font-family: var(--font); font-size: 13.5px; color: var(--ink); background: var(--card); border: 0; box-shadow: var(--inset-2); border-radius: var(--r-input); padding: 10px 12px; outline: none; }
+  .input:focus, .ta:focus { box-shadow: var(--ink-soft) 0 0 0 1.5px inset; }
+  .ta { resize: vertical; min-height: 84px; line-height: 1.55; }
+  .switchrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; background: var(--card); border-radius: 12px; box-shadow: var(--inset-2); margin-bottom: 9px; }
+  .switchrow .sw-t { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .switchrow .sw-d { font-size: 11.5px; color: var(--muted); margin-top: 1px; line-height: 1.45; }
+  .switch { position: relative; width: 36px; height: 21px; background: #d9d3c8; border-radius: 99px; cursor: pointer; transition: background .18s; flex: none; border: 0; }
+  .switch.on { background: var(--green); }
+  .switch::after { content: ""; position: absolute; top: 2.5px; left: 2.5px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .18s var(--spring); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .switch.on::after { left: 17.5px; }
+  .seg { display: inline-flex; background: var(--panel); border-radius: 10px; padding: 3px; gap: 2px; }
+  .seg button { font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--muted); background: transparent; border: 0; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  .seg button.sel { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+  .mailprev { background: var(--card); border-radius: 12px; box-shadow: var(--inset-2); overflow: hidden; }
+  .mailprev .mp-head { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 11.5px; color: var(--muted); line-height: 1.7; }
+  .mailprev .mp-head b { color: var(--ink-soft); font-weight: 600; }
+  .mailprev .mp-body { padding: 14px; font-size: 12.5px; line-height: 1.65; color: var(--body); }
+  .mailprev .mp-body p { margin-bottom: 9px; }
+  .mailprev .mp-tag { display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; background: var(--violet-soft); color: var(--violet); border-radius: 99px; padding: 3px 8px; margin-bottom: 8px; }
+
+  .modal { position: fixed; inset: 0; z-index: 1320; display: grid; place-items: center; padding: 30px; opacity: 0; pointer-events: none; transition: opacity .22s; }
+  .modal.on { opacity: 1; pointer-events: auto; }
+  .modal .m-card { background: var(--bg); border-radius: 20px; box-shadow: var(--pop-lg); width: 640px; max-width: 100%; max-height: 86vh; overflow-y: auto; transform: translateY(14px) scale(.98); transition: transform .3s var(--spring); }
+  .modal.on .m-card { transform: none; }
+  .m-head { display: flex; align-items: center; gap: 11px; padding: 18px 24px 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 2; }
+  .m-head .mt { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .m-head .ms { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .m-head .x { margin-left: auto; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; color: var(--muted); flex: none; }
+  .m-head .x:hover { background: var(--stone); color: var(--ink); }
+  .m-body { padding: 20px 24px; }
+  .m-foot { padding: 14px 24px 18px; display: flex; gap: 9px; align-items: center; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: var(--bg); }
+
+  .doc { background: #fff; border-radius: 10px; box-shadow: var(--inset-2), 0 10px 30px rgba(19,18,16,.07); padding: 28px 30px; font-size: 12px; color: var(--body); }
+  .doc .doc-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+  .doc h4 { font-family: var(--display); font-size: 19px; font-weight: 550; color: var(--ink); margin: 8px 0 2px; }
+  .doc .doc-sub { font-size: 11.5px; color: var(--muted); }
+  .doc .doc-line { height: 7px; border-radius: 4px; background: var(--stone); margin-top: 10px; }
+  .doc .doc-line.w60 { width: 60%; } .doc .doc-line.w85 { width: 85%; } .doc .doc-line.w72 { width: 72%; }
+  .doc .doc-sig { display: flex; gap: 16px; margin-top: 22px; padding-top: 14px; border-top: 1px dashed var(--border-2); }
+  .doc .doc-sig .sigbox { flex: 1; height: 44px; border-radius: 8px; background: var(--amber-soft); display: grid; place-items: center; font-size: 11px; font-weight: 600; color: var(--amber); }
+
+  #toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(90px); z-index: 1400; background: var(--ink); color: #fff; border-radius: 12px; padding: 12px 16px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; box-shadow: var(--pop-lg); transition: transform .35s var(--spring); max-width: 92vw; }
+  #toast.on { transform: translateX(-50%) translateY(0); }
+  #toast .t-undo { color: #ffb399; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  #toast .ic { color: var(--green); }
+
+  .pop { position: absolute; z-index: 60; background: var(--bg); border-radius: 14px; box-shadow: var(--pop-lg); padding: 14px 16px; width: 290px; display: none; }
+  .pop.on { display: block; animation: rise .25s var(--spring); }
+  .pop .p-t { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+  .pop .p-d { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .pop .p-opt { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 9px; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; }
+  .pop .p-opt:hover { background: var(--panel); }
+  .pop .p-opt .ic { color: var(--muted); }
+
+  .msg { display: flex; gap: 11px; margin-bottom: 16px; }
+  .msg .m-wrap { min-width: 0; }
+  .msg .m-bubble { background: var(--card); border-radius: 4px 14px 14px 14px; box-shadow: var(--inset-2); padding: 12px 15px; font-size: 13px; line-height: 1.6; color: var(--body); max-width: 540px; }
+  .msg.out .m-bubble { background: var(--ink); color: #e8e5df; border-radius: 14px 4px 14px 14px; }
+  .msg.out { flex-direction: row-reverse; }
+  .msg .m-meta { font-size: 10.5px; color: var(--muted-2); margin-top: 5px; font-family: var(--mono); display: flex; gap: 8px; align-items: center; }
+  .msg.out .m-meta { justify-content: flex-end; }
+  .msg .m-meta .agent-chip { font-family: var(--font); font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--violet-soft); color: var(--violet); border-radius: 99px; padding: 2px 7px; }
+
+  .pub-link { display: flex; align-items: center; gap: 10px; background: var(--card); border-radius: 13px; box-shadow: var(--inset-2); padding: 13px 16px; font-family: var(--mono); font-size: 13px; color: var(--ink-soft); }
+  .confetti { position: fixed; width: 8px; height: 13px; border-radius: 2px; z-index: 1500; pointer-events: none; animation: fall 1.6s ease-in forwards; }
+  @keyframes fall { 0% { transform: translateY(-20px) rotate(0); opacity: 1; } 100% { transform: translateY(105vh) rotate(540deg); opacity: .4; } }
+
+  .replay { background: var(--ink); border-radius: 18px; padding: 22px 24px; color: #d9d6cf; }
+  .replay .rp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .replay .rp-title { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: .02em; }
+  .replay .rp-sub { font-size: 11px; color: #8d897f; font-family: var(--mono); }
+  .rp-row { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #2b2925; opacity: 0; transform: translateY(6px); }
+  .rp-row:last-child { border-bottom: 0; }
+  .rp-row.shown { animation: rise .4s var(--spring) forwards; }
+  .rp-row .rp-tm { font-family: var(--mono); font-size: 11px; color: #8d897f; width: 64px; flex: none; padding-top: 2px; }
+  .rp-row .rp-tx { font-size: 13px; line-height: 1.55; }
+  .rp-row .rp-tx b { color: #fff; font-weight: 600; }
+  .rp-row .rp-ic { width: 24px; height: 24px; border-radius: 7px; background: #262420; display: grid; place-items: center; color: #b5b1a7; flex: none; }
+
+  .digest { max-width: 600px; margin: 0 auto; background: var(--card); border-radius: 18px; box-shadow: var(--pop); overflow: hidden; }
+  .digest .dg-chrome { background: var(--panel); padding: 12px 22px; font-size: 11.5px; color: var(--muted); border-bottom: 1px solid var(--border); line-height: 1.8; }
+  .digest .dg-chrome b { color: var(--ink-soft); font-weight: 600; }
+  .digest .dg-head { background: var(--ink); color: #fff; padding: 22px 26px; }
+  .digest .dh-t { font-family: var(--display); font-size: 19px; font-weight: 500; }
+  .digest .dh-s { font-size: 12px; color: #a5a199; margin-top: 4px; }
+  .digest .dg-body { padding: 20px 26px; }
+  .dg-row { display: flex; gap: 11px; padding: 10px 0; border-bottom: 1px solid #f5f2ec; font-size: 13px; line-height: 1.55; }
+  .dg-row:last-child { border-bottom: 0; }
+  .dg-row .ic { color: var(--muted); margin-top: 2px; }
+  .dg-row b { color: var(--ink); }
+  .digest .dg-foot { padding: 14px 26px 18px; font-size: 10.5px; color: var(--muted-2); border-top: 1px solid var(--border); line-height: 1.7; }
+
+  .price-card { background: var(--card); border-radius: 18px; box-shadow: var(--inset); padding: 22px 24px; }
+  .price-card .pr-n { font-family: var(--display); font-size: 30px; color: var(--ink); }
+  .price-card .pr-n span { font-size: 14px; font-family: var(--font); color: var(--muted); }
+  .tick { display: flex; gap: 9px; font-size: 13px; color: var(--body); padding: 4.5px 0; align-items: flex-start; }
+  .tick .ic { color: var(--green); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1"/><path d="M9 13v1.5M15 13v1.5"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol>
+  <symbol id="i-sign" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 16c1.5-1.6 2.6-1 3.2.2.5 1 1.6 1.4 2.8-.2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M20 7 12 3 4 7v10l8 4 8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="m3 9 9-6 9 6"/><path d="M4 9v11M20 9v11M8 12v5M12 12v5M16 12v5"/><path d="M2 20h20"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/><path d="M10 21v-3h4v3"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 4.6a3.5 3.5 0 0 1 0 6.8M17.5 14.3c2.4.8 4 2.8 4 5.7"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v-4M12 17V8M17 13v-3"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l1.9 5.7L20 9.6l-5.6 2.3L12 18l-2.4-6.1L4 9.6l6.1-1.9z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5M12 4v12"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.5 2 1.3 0 2.2-.3 2.9-.6a.5.5 0 0 1 .6.5V14a1 1 0 0 1-.4.8 6 6 0 0 1-3.6 1.2c-3 0-5-2-7.5-2a6 6 0 0 0-3.5 1"/></symbol>
+  <symbol id="i-dollar" viewBox="0 0 24 24"><path d="M12 2v20M17 5.5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2.2M12 19.8V22M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2 12h2.2M19.8 12H22M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></symbol>
+  <symbol id="i-panda" viewBox="0 0 26 26"><circle cx="9.7" cy="13.3" r="1.5" fill="#fff" stroke="none"/><circle cx="16.3" cy="13.3" r="1.5" fill="#fff" stroke="none"/><path d="M10.5 17.2c.9 1 3.1 1 4 0" stroke="#fff" stroke-width="1.4" fill="none"/></symbol>
+</svg>
+
+<div id="protobar">
+  <span class="pb-tag"><span class="pb-dot"></span> Launch Agent · v2</span>
+  <span class="pb-step" id="pbStep"><b>1</b>/11</span>
+  <span class="pb-spacer"></span>
+  <select id="pbJump" autocomplete="off" onchange="go(+this.value)"></select>
+  <button onclick="next()">Next →</button>
+</div>
+
+<div class="stage" id="stageRoot"></div>
+
+<div class="scrim" id="scrim" onclick="closeAll()"></div>
+<div class="drawer" id="drawer"></div>
+<div class="modal" id="modal" onclick="if(event.target===this)closeAll()"></div>
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   Single source of truth — every screen renders from STATE.
+   Demo "today" = Wednesday, June 10, 2026.
+   ========================================================= */
+const ic = (name, cls) => `<svg class="ic ${cls||''}"><use href="#${name}"/></svg>`;
+const AV_COLORS = { JM:'#0084ec', SO:'#6e56e8', AR:'#ff3e00', DP:'#00a843', TB:'#36342f' };
+const av = (ini, size) => `<span class="av av--${size||30}" style="background:${AV_COLORS[ini]||'#888'}">${ini}</span>`;
+
+const STATE = {
+  fee: 45000,
+  feeApproved: false,
+  resolved: {},
+  held: {},
+  benchOff: {},
+  lendingSwapped: false,
+  published: false,
+  opsParsed: false,
+  closingSteps: [
+    { id:'welcome', n:1, t:'Welcome & brand story', d:'Personalized portal, video, and what-comes-next — opened the day a lead qualifies', tag:'auto', tagLabel:'Agent runs',
+      mail:{ subj:'Welcome to Rally & Roam, {first_name} 🎾', body:'Hi {first_name},\n\nI\'m the launch assistant for Rally & Roam. Your private portal is ready — the 3-minute brand film, the full process map, and your next two steps are inside.\n\nNothing is required today. When you\'re ready, I\'ll help you book Discovery Day.' } },
+    { id:'discovery', n:2, t:'Discovery Day', d:'Agent schedules around the candidate, sends prep packet, files your team\'s debrief', tag:'auto', tagLabel:'Agent runs',
+      mail:{ subj:'Your Discovery Day — let\'s pick a date', body:'Hi {first_name},\n\nTime to see Rally & Roam up close. I\'m holding three dates at the Salt Lake flagship — tap one and I\'ll handle flights-to-door logistics and send your prep packet.' } },
+    { id:'fdd', n:3, t:'FDD review & initial signing', d:'Packet prepared from your current template — held until you approve each send', tag:'gate', tagLabel:'You approve',
+      mail:{ subj:'Your Franchise Disclosure Document', body:'Hi {first_name},\n\nAttached is Rally & Roam\'s FDD (v4, March 2026). By federal rule you\'ll have it at least 14 days before anything can be signed — use that time well; I\'ll guide you through a launch-prep sprint so day 15 is a formality.' } },
+    { id:'cooldown', n:4, t:'14-day cooldown → Launch Prep Sprint', d:'Entity formed, financing pre-qualified, insurance quoted — nothing binding inside the window', tag:'svc', tagLabel:'Services moment',
+      mail:{ subj:'Two weeks that make day 15 instant', body:'Hi {first_name},\n\nWhile the disclosure clock runs, here\'s your sprint: form your entity (2 days), pre-qualify financing sized to the investment range, and get insurance quoted to brand spec. I\'ll walk you through each one.' } },
+    { id:'final', n:5, t:'Final franchise agreement', d:'Routed only after the agent verifies the signing entity exists', tag:'gate', tagLabel:'You approve',
+      mail:{ subj:'Your franchise agreement is ready to sign', body:'Hi {first_name},\n\nYour cooldown ends today and everything is verified: entity ✓, financing ✓, insurance ✓. Your agreement is ready for signature by {entity_name}.' } },
+    { id:'feepay', n:6, t:'Franchise fee — $45,000', d:'Payment request pre-staged; collected via CoverPanda Payments on your approval', tag:'gate', tagLabel:'You approve',
+      mail:{ subj:'Final step: your franchise fee', body:'Hi {first_name},\n\nCongratulations on signing! Your secure payment link is below — one transfer of {fee} and your onboarding begins the same minute.' } },
+    { id:'handoff', n:7, t:'Signed → onboarding handoff', d:'Same-minute: portal opens with dates, kickoff call booked, vendor bench staged', tag:'auto', tagLabel:'Agent runs',
+      mail:{ subj:'Welcome to the family — here\'s your roadmap', body:'Hi {first_name},\n\nIt\'s official. Your onboarding portal is live with every milestone dated from today, and your kickoff call with Taylor is on the calendar. See you Thursday at 9.' } },
+  ],
+  arOn: false, muOn: false, ddOn: true, i19On: true,
+  phases: [
+    { n:1, t:'Entity, money & paperwork', meta:'11 tasks · 4 evidence uploads', wk:'W 1–3', tasks:[
+      { t:'Form the operating entity & EIN', svc:'CoverPanda Formation', wk:'W1' },
+      { t:'Open business bank account · fund $25K minimum', wk:'W1' },
+      { t:'Finalize build-out financing ($200K–$650K by venue type)', svc:'CoverPanda Lending', wk:'W2' },
+      { t:'Bind required insurance — GL, property, workers\' comp', svc:'CoverPanda Insurance', wk:'W2' },
+      { t:'Countersigned agreement & fee receipt filed — agent does this', wk:'W1' } ]},
+    { n:2, t:'Site selection & approval', meta:'9 tasks · your REC approval is the gate', wk:'W 2–10', tasks:[
+      { t:'Territory review & site shortlist', wk:'W3' },
+      { t:'Submit site package for brand approval', wk:'W6' },
+      { t:'LOI negotiation with landlord', wk:'W8' } ]},
+    { n:3, t:'Lease & legal', meta:'7 tasks · lease execution starts the build clock', wk:'W 6–14', tasks:[
+      { t:'Lease rider & landlord consent', wk:'W9' },
+      { t:'Execute lease — agent logs the construction deadline', wk:'W10' } ]},
+    { n:4, t:'Design & build-out', meta:'14 tasks · bids, permits, construction, inspections', wk:'W 12–22', tasks:[
+      { t:'Architect plans → brand approval', wk:'W12' },
+      { t:'3 GC bids & selection', wk:'W14' },
+      { t:'Permits, build, certificate of occupancy', wk:'W16+' } ]},
+    { n:5, t:'Vendors & technology', meta:'12 tasks · POS, utilities, suppliers, payroll', wk:'W 16–22', tasks:[
+      { t:'POS & tech stack install', wk:'W17' },
+      { t:'Payroll & HR setup before first hire', svc:'CoverPanda Payroll', wk:'W18' },
+      { t:'F&B suppliers & service contracts', wk:'W19' } ]},
+    { n:6, t:'Hiring & leadership training', meta:'16 tasks · GM hire through team training', wk:'W 18–24', tasks:[
+      { t:'Hire GM & leadership', wk:'W18' },
+      { t:'Brand training program', wk:'W20' },
+      { t:'Hiring event — 15–20 team members', wk:'W22' } ]},
+    { n:7, t:'Pre-opening marketing & grand-open buildup', meta:'9 tasks · local buzz, pre-sales, loyalty list', wk:'W 20–26', tasks:[
+      { t:'Local launch-marketing plan → brand approval', wk:'W20' },
+      { t:'Social & community pre-launch campaign live', wk:'W22' },
+      { t:'Grand-opening event plan & local PR', wk:'W24' },
+      { t:'Loyalty / pre-sale list — seed first-week demand', wk:'W25' } ]},
+    { n:8, t:'Soft opening', meta:'8 tasks · limited hours, benchmarks, fixes', wk:'W 25', tasks:[
+      { t:'Soft-open program & team benchmarks', wk:'W25' } ]},
+    { n:9, t:'Grand opening', meta:'7 tasks · launch event & final compliance', wk:'W 26', tasks:[
+      { t:'Grand opening event & marketing', wk:'W26' },
+      { t:'Final brand approval to open', wk:'W26' } ]},
+    { n:10, t:'Open & operating', meta:'6 recurring obligations — modeled as recurring, not a checklist', wk:'∞', tasks:[
+      { t:'Weekly royalty & brand-fund collection — automated', wk:'wkly' },
+      { t:'Monthly P&L rolls into your Financial OS consolidation', svc:'CoverPanda Accounting', wk:'mthly' },
+      { t:'Insurance COI renewals tracked', svc:'CoverPanda Insurance', wk:'yrly' } ]},
+  ],
+  candidates: {
+    jordan: { ini:'JM', name:'Jordan Mills', loc:'Boise, ID', stage:'Evaluation', stageNote:'Waiting on your FDD approval', stClass:'wait',
+      head:'Closing · evaluation passed Mon', sub:'Qualified May 18 · Discovery Day done Jun 2 · FDD packet awaiting your approval',
+      tl:[
+        { cls:'done', t:'Qualified & welcomed', tags:['agent'], d:'Portal opened May 18; brand film watched the same evening.', tm:'May 18' },
+        { cls:'done', t:'Discovery Day — Salt Lake flagship', tags:['agent'], d:'Agent coordinated travel, prep packet, and your team\'s debrief. Internal score: strong yes.', tm:'Jun 2' },
+        { cls:'done', t:'Evaluation cleared', tags:['agent'], d:'Capital verified ($410K liquid), background clean, references logged.', tm:'Mon Jun 8' },
+        { cls:'now', t:'FDD send — waiting on you', tags:['you'], d:'Packet prepared from template v4 (Mar 2026). Approving starts Jordan\'s 14-day clock and the launch-prep sprint.', tm:'In your queue · 2 days' },
+        { cls:'', t:'Cooldown → Launch Prep Sprint', tags:['svc'], d:'Formation, financing pre-qual, and insurance quote — scheduled to complete inside the window.', tm:'projected Jun 10–24' },
+      ],
+      msgs:[
+        { out:true, tx:'Hi Jordan — three Discovery Day dates are held at the Salt Lake flagship: May 28, Jun 2, Jun 4. Tap one and I\'ll handle the rest.', tm:'May 22 · 10:02 AM', agent:true },
+        { out:false, tx:'June 2nd works great. Do I need to prepare anything?', tm:'May 22 · 1:47 PM' },
+        { out:true, tx:'Just yourself. Your prep packet is in the portal — the unit economics one-pager is worth 10 minutes on the flight. Travel logistics land in your inbox tomorrow.', tm:'May 22 · 1:49 PM', agent:true },
+      ]},
+    sam: { ini:'SO', name:'Sam Okafor', loc:'Tucson, AZ', stage:'Cooldown', stageNote:'Paused — territory question', stClass:'you',
+      head:'Closing · cooldown day 6 of 14', sub:'Qualified Apr 28 · FDD sent Jun 4 · on pace to sign Thu Jun 18 · sprint 2 of 3 done',
+      tl:[
+        { cls:'done', t:'Qualified & welcomed', tags:['agent'], d:'Personalized portal opened; brand story watched same day.', tm:'Apr 28' },
+        { cls:'done', t:'Discovery Day completed', tags:['agent'], d:'Agent scheduled around Sam\'s flights, sent prep, filed your debrief.', tm:'May 21' },
+        { cls:'done', t:'FDD sent & initial ack', tags:['you'], d:'One tap from your queue. 14-day clock started automatically.', tm:'Thu Jun 4' },
+        { cls:'agent', t:'Cooldown → Launch Prep Sprint', tags:['svc'], d:'The mandated quiet window, made productive — nothing here signs or pays:', tm:'Jun 4 → 18',
+          svcs:[
+            { icn:'i-building', t:'Entity formed — Okafor Hospitality LLC', d:'CoverPanda Formation · EIN issued Jun 8', st:'Done ✓' },
+            { icn:'i-bank', t:'Financing pre-qualified — $480,000', d:'CoverPanda Lending · SBA 7(a), sized to your Item 7', st:'Done ✓' },
+            { icn:'i-shield', t:'Insurance quoted to brand spec', d:'CoverPanda Insurance · binds the day the agreement signs', st:'Ready' } ]},
+        { cls:'now', t:'Territory question — paused for you', tags:['you'], d:'Sam asked about extending the protected territory to Oro Valley. Draft reply with Item 12 talking points is in your queue; cadence resumes when you respond.', tm:'Today · 8:41 AM' },
+        { cls:'', t:'Day 15: final agreement & fee', tags:['gate'], d:'Entity ✓ · financing ✓ · insurance ✓ — signing and the fee can happen the morning the cooldown lifts.', tm:'Thu Jun 18 · projected' },
+      ],
+      msgs:[
+        { out:true, tx:'Sam — your FDD is in the portal. The 14-day clock runs through Jun 18. While it does, want me to line up your entity, financing pre-qual, and insurance quote so signing day is instant?', tm:'Jun 4 · 9:15 AM', agent:true },
+        { out:false, tx:'Yes to all three. Quick one though — my brother lives in Oro Valley. Could the protected territory stretch that far?', tm:'Today · 8:41 AM' },
+        { out:true, tx:'Good question — territory boundaries are a decision for the Rally & Roam team, not me. I\'ve flagged it to Taylor with the relevant FDD section and paused your checklist until you hear back (today, most likely).', tm:'Today · 8:42 AM', agent:true },
+      ]},
+    alex: { ini:'AR', name:'Alex Rivera', loc:'Phoenix, AZ', stage:'Signing', stageNote:'Fee staged — your approval', stClass:'ok',
+      head:'Closing · final agreement signed this morning', sub:'Qualified Mar 30 · cooldown sprint completed May 29 · signed today 9:14 AM',
+      tl:[
+        { cls:'done', t:'Qualified, Discovery Day, FDD', tags:['agent'], d:'Full cadence ran Mar 30 → May 15 with two approvals from you.', tm:'Mar 30 – May 15' },
+        { cls:'done', t:'Launch Prep Sprint completed', tags:['svc'], d:'Rivera Social Ventures LLC formed (EIN May 22) · $510K approved · insurance bound at signing.', tm:'May 15–29' },
+        { cls:'done', t:'Final agreement executed', tags:['agent'], d:'Agent verified the entity against state records before routing for signature.', tm:'Today · 9:14 AM' },
+        { cls:'now', t:'$45,000 fee — staged for your approval', tags:['you'], d:'One tap collects via CoverPanda Payments and triggers the same-minute onboarding handoff.', tm:'In your queue' },
+      ],
+      msgs:[
+        { out:true, tx:'Alex — everything\'s verified for this morning: entity ✓, funds ✓, insurance ready to bind. Your agreement goes live for signature at 9 AM.', tm:'Today · 7:30 AM', agent:true },
+        { out:false, tx:'Signed! That was the smoothest contract process I\'ve ever been through.', tm:'Today · 9:16 AM' },
+      ]},
+  },
+  approvals: [
+    { id:'a1', icn:'i-send', icbg:'var(--amber-soft)', iccol:'var(--amber)', t:'Send FDD to Jordan Mills', who:'jordan', whoTx:'Boise, ID · evaluation passed Monday', gate:'Binding gate',
+      body:'Jordan cleared your bar (capital verified, background done, Discovery Day Jun 2). FDD packet is prepared from your current template — <b>v4, dated Mar 2026</b>. Sending starts the 14-day clock.',
+      approveLabel:'Approve & send', approveMsg:'FDD sent to Jordan · 14-day clock started · sprint begins', review:'packet' },
+    { id:'a2', icn:'i-dollar', icbg:'var(--green-soft)', iccol:'var(--green-deep)', t:'Collect $45,000 franchise fee — Alex Rivera', who:'alex', whoTx:'Phoenix, AZ · agreement signed 9:14 AM today', gate:'Money gate',
+      body:'<b>Rivera Social Ventures LLC</b> executed the franchise agreement this morning. Payment request is staged to their verified bank. Approving collects the fee and triggers the same-minute onboarding handoff.',
+      approveLabel:'Approve & collect', approveMsg:'$45,000 collected · onboarding handoff running', review:'agreement' },
+    { id:'a3', icn:'i-flag', icbg:'var(--ember-soft)', iccol:'var(--ember-deep)', t:'Territory question needs a human', who:'sam', whoTx:'Tucson, AZ · cooldown day 6 · cadence paused', gate:'Judgment call',
+      body:'Sam asked whether the protected territory can extend to Oro Valley. That\'s a <b>deal-term decision</b> — outside my lane. I drafted a reply from FDD Item 12 and held all other comms until you weigh in.',
+      approveLabel:'Open draft reply', approveMsg:'', review:'draft' },
+  ],
+  feed: [
+    { icn:'i-cal', tx:'Booked <b>cooldown check-in</b> with Sam for Friday — sprint recap + signing-day logistics', tm:'24 min ago' },
+    { icn:'i-sign', tx:'Verified <b>Rivera Social Ventures LLC</b> against AZ state records, then routed the final agreement', tm:'8:55 AM' },
+    { icn:'i-check', tx:'Alex Rivera <b>executed the franchise agreement</b> · fee staged to your queue', tm:'9:14 AM' },
+    { icn:'i-shield', tx:'Bound Alex\'s insurance at signature — COI naming Rally & Roam filed to compliance', tm:'9:15 AM' },
+    { icn:'i-bank', tx:'Sam Okafor <b>pre-qualified for $480K</b> — CoverPanda Lending, sized to Item 7', tm:'Mon 4:12 PM' },
+    { icn:'i-msg', tx:'Nudged Dana Park\'s GC for the <b>permit milestone photos</b> — received & filed', tm:'Mon 11:08 AM' },
+    { icn:'i-chart', tx:'Friday digest <b>drafting live</b> — sends Jun 12, 4:00 PM', tm:'auto' },
+  ],
+};
+
+/* ---------- screens registry ---------- */
+const SCREENS = [
+  { name:'0 · Upgrade — unlock the Launch Agent', render: rUpgrade },
+  { name:'1 · Meet your Launch Agent', render: rMeet },
+  { name:'2 · Co-work — your closing motion', render: rClosing },
+  { name:'3 · Co-work — your onboarding cadence', render: rOnboarding },
+  { name:'4 · Co-work — your vendor bench', render: rBench },
+  { name:'5 · Review — the launch line', render: rReview },
+  { name:'6 · Published — the payoff', render: rPublished },
+  { name:'7 · Agent console — approve by exception', render: rConsole },
+  { name:'8 · Candidate record (live routing)', render: rCandidate },
+  { name:'9 · The handoff — activity replay', render: rReplay },
+  { name:'10 · Franchisee record — Dana Park, week 16', render: rDana },
+  { name:'11 · Pricing + Friday digest', render: rPricing },
+  { name:'12 · Candidate closing portal', render: rClosePortal },
+];
+let cur = 0, currentCand = 'sam', candTab = 'tl', closeSel = null;
+
+/* ---------- helpers ---------- */
+const $id = s => document.getElementById(s);
+function fee$() { return '$' + STATE.fee.toLocaleString('en-US'); }
+function toast(msg, undoFn, linkLabel, linkFn) {
+  const t = $id('toast');
+  window._undoFn = undoFn || null; window._linkFn = linkFn || null;
+  t.innerHTML = ic('i-check') + `<span>${msg}</span>` +
+    (linkLabel ? `<span class="t-undo" onclick="window._linkFn&&window._linkFn()">${linkLabel}</span>` : '') +
+    (undoFn ? `<span class="t-undo" onclick="window._undoFn&&window._undoFn();hideToast()">Undo</span>` : '');
+  t.classList.add('on');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(hideToast, 4600);
+}
+function hideToast() { $id('toast').classList.remove('on'); }
+function openDrawer(html) { $id('drawer').innerHTML = html; $id('drawer').classList.add('on'); $id('scrim').classList.add('on'); }
+function openModal(html) { $id('modal').innerHTML = `<div class="m-card">${html}</div>`; $id('modal').classList.add('on'); $id('scrim').classList.add('on'); }
+function closeAll() { $id('drawer').classList.remove('on'); $id('modal').classList.remove('on'); $id('scrim').classList.remove('on'); document.querySelectorAll('.pop.on').forEach(p => p.classList.remove('on')); }
+function confetti() {
+  const colors = ['#ff3e00','#00a843','#0084ec','#a87a08','#6e56e8'];
+  for (let i = 0; i < 36; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = (5 + (i * 90 / 36) + (i % 3) * 1.5) + 'vw';
+    c.style.background = colors[i % 5];
+    c.style.animationDelay = (i % 9) * 0.07 + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2300);
+  }
+}
+function typewrite(elId, html, speed) {
+  const el = $id(elId); if (!el) return;
+  const tmp = document.createElement('div'); tmp.innerHTML = html;
+  const plain = tmp.textContent;
+  let i = 0; el.innerHTML = '<span class="typing-caret"></span>';
+  clearInterval(window._tw);
+  window._tw = setInterval(() => {
+    i += 3 + Math.floor(Math.random() * 3);
+    if (i >= plain.length) { clearInterval(window._tw); el.innerHTML = html; return; }
+    el.innerHTML = plain.slice(0, i) + '<span class="typing-caret"></span>';
+  }, speed || 14);
+}
+function sideNav(active, opts) {
+  opts = opts || {};
+  const badge = 3 - Object.keys(STATE.resolved).length;
+  const item = (key, icn, label, b) =>
+    `<a class="${active===key?'on':''}" onclick="${key==='agent'?'go(7)':`toast('${label} — outside this prototype\\'s scope (see build plan §2)')`}">${ic(icn)} ${label}${b?`<span class="badge">${b}</span>`:''}</a>`;
+  return `<aside class="app__side">
+    <div class="ws-switch" onclick="toast('Workspace switcher — out of scope for v2')"><span class="wsq">R</span><span class="nm">Rally &amp; Roam</span>${ic('i-chev','ic--s')}</div>
+    <div class="srch" onclick="toast('Command palette — out of scope for v2')">${ic('i-search')} Search<span class="kbd">⌘K</span></div>
+    <ul class="snav">
+      ${opts.backTo!==undefined ? `<a onclick="go(${opts.backTo})">${ic('i-arrow')} <span style="transform:scaleX(-1)"></span>Back to Launch Agent</a>` : item('inbox','i-inbox','My Inbox')}
+      <li class="lab">${opts.section || 'Development'}</li>
+      ${opts.items ? opts.items.map(i => `<a class="${i.on?'on':''}" onclick="${i.fn||`toast('${i.l} — outside this prototype')`}">${ic(i.icn)} ${i.l}${i.b?`<span class="badge">${i.b}</span>`:''}</a>`).join('') :
+        item('lead','i-board','Lead Inbox') + item('agent','i-bot','Launch Agent', badge>0?badge:null) + item('closing','i-file','Closing Portals') + item('onb','i-rocket','Onboarding') +
+        `<li class="lab">Workspace</li>` + item('loc','i-pin','Locations') + item('pay','i-card','Payments') + item('agr','i-sign','Agreements') + item('bench','i-box','Vendor Bench')}
+    </ul>
+    <div class="side-foot">${av('TB','24')}<div><div class="nm">Taylor B.</div><div class="em">taylor@rallyroam.com</div></div></div>
+  </aside>`;
+}
+function obTop(stepIdx) {
+  const dots = [0,1,2,3,4].map(i => `<span class="st ${i<=stepIdx?'on':''}"></span>`).join('');
+  return `<div class="ob__top">
+    <a class="logo" onclick="go(1)"><svg width="22" height="22" viewBox="0 0 26 26"><rect width="26" height="26" rx="8" fill="#131210"/><use href="#i-panda"/></svg> coverpanda</a>
+    <div class="ob__steps">${dots}</div>
+    <span class="save-pill"><span class="dot"></span> saved <span id="saveTick">just now</span></span>
+  </div>`;
+}
+
+/* ====================== SCREEN 0 — MEET ====================== */
+function freeRow(icn, t, d){ return `<div style="display:flex; gap:10px; align-items:flex-start"><span style="width:30px;height:30px;border-radius:9px;background:var(--green-soft);color:var(--green-deep);display:grid;place-items:center;flex:none">${ic(icn,'ic--s')}</span><div><div style="font-size:13px;font-weight:600;color:var(--ink)">${t}</div><div style="font-size:12px;color:var(--muted)">${d}</div></div></div>`; }
+function rUpgrade() {
+  return `<div class="wrap" style="max-width:900px; padding-top:38px">
+    <div class="rv" style="text-align:center">
+      <span class="eyebrow" style="justify-content:center"><span class="dot"></span> CoverPanda · you're on the Free plan</span>
+      <h1 class="display" style="font-size:42px; margin-top:14px">You built the system.<br/>Stop running it by hand.</h1>
+      <p class="sub" style="max-width:580px; margin:12px auto 0">Free CoverPanda already gave you the financial OS — connected books, automated royalties, reports your franchisees actually read. But every new franchisee still closes and onboards on <i>your</i> time. That's the part the Launch Agent takes over.</p>
+    </div>
+    <div class="rv" style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:26px; align-items:start">
+      <div class="card">
+        <div class="seclab">On your free plan — already running</div>
+        <div style="margin-top:13px; display:flex; flex-direction:column; gap:11px">
+          ${freeRow('i-chart','Consolidated financials','QuickBooks synced · network P&L rolled up across every unit')}
+          ${freeRow('i-dollar','Royalty automation','POS-fed, reviewed, collected weekly')}
+          ${freeRow('i-file','Reports & announcements','AI-drafted, sent, engagement-tracked')}
+          ${freeRow('i-rocket','Closing & onboarding portals','built — but today you drive them by hand')}
+        </div>
+        <div class="hint" style="margin-top:15px">${ic('i-spark')} <span>Everything here <b>stays exactly as it is.</b> The agent doesn't replace your workspace — it picks up the closing &amp; onboarding portals you already built and runs them itself.</span></div>
+      </div>
+      <div>
+        <div class="card" style="box-shadow: var(--inset), #f3d9cf 0 0 0 1.5px inset">
+          <div class="seclab" style="color:var(--ember-deep)">Why now</div>
+          <div style="display:flex; gap:8px; margin-top:11px; flex-wrap:wrap">
+            <span class="chip">4 qualified prospects</span>
+            <span class="chip">2 closing by hand</span>
+            <span class="chip" style="color:var(--ember-deep)">1 stalled 38 days</span>
+          </div>
+          <div style="font-size:12.5px; color:var(--muted); margin-top:11px; line-height:1.55">Your pipeline outgrew your calendar. Each deal is ~20 touchpoints over 6 weeks; the math breaks around three concurrent deals — which is exactly where you are.</div>
+        </div>
+        <div class="card" style="margin-top:14px; box-shadow:var(--ink) 0 0 0 2px inset">
+          <div style="display:flex; align-items:center; gap:11px">
+            <span class="av av--38" style="background:var(--ink)"><svg width="20" height="20" viewBox="0 0 26 26"><use href="#i-panda"/></svg></span>
+            <div><div style="font-size:16px; font-weight:700; color:var(--ink)">Launch Agent</div><div style="font-size:12px; color:var(--muted)">the upgrade that closes &amp; onboards for you</div></div>
+          </div>
+          <div style="margin-top:13px; display:flex; flex-direction:column; gap:6px">
+            <div class="tick">${ic('i-check','ic--s')} Runs every deal qualified → signed → open doors</div>
+            <div class="tick">${ic('i-check','ic--s')} Approve-by-exception — pulls you in only at the gates</div>
+            <div class="tick">${ic('i-check','ic--s')} Hands each new franchisee straight into your financial OS</div>
+          </div>
+          <div style="display:flex; align-items:baseline; gap:8px; margin-top:15px">
+            <span style="font-family:var(--display); font-size:27px; color:var(--ink)">$750</span>
+            <span style="font-size:12.5px; color:var(--muted)">per signed franchisee · pay only when they sign</span>
+          </div>
+          <button class="btn btn--dark btn--block btn--lg" style="margin-top:13px" onclick="next()">Upgrade — activate the agent ${ic('i-arrow','ic--s')}</button>
+          <div style="text-align:center; margin-top:9px"><button class="mlink" onclick="go(11)">See full pricing</button></div>
+          ${window.cpGoMap ? `<div style="text-align:center; margin-top:6px"><button class="mlink" onclick="cpGoMap()">Not now — back to my journey</button></div>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="rv" style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:12px; color:var(--muted-2)">a paid upgrade on top of your free CoverPanda workspace · nothing you set up is lost · cancel anytime</div>
+  </div>`;
+}
+
+function rMeet() {
+  return `<div class="wrap wrap--narrow" style="text-align:center; padding-top:58px">
+    <div class="rv"><span class="eyebrow" style="justify-content:center"><span class="dot"></span> New for Rally &amp; Roam · add-on</span></div>
+    <h1 class="display rv" style="margin-top:16px; font-size:46px">Hire your Launch Agent.</h1>
+    <p class="sub rv" style="max-width:540px; margin-left:auto; margin-right:auto">It runs every deal from <b>qualified prospect to open doors</b> — sends the right thing at the right moment, keeps candidates moving, and pulls you in only when a decision is genuinely yours.</p>
+    <div class="rv" style="display:flex; gap:9px; justify-content:center; margin:24px 0 6px; flex-wrap:wrap">
+      <span class="chip">${ic('i-file','ic--s')} Works your closing portal</span>
+      <span class="chip">${ic('i-rocket','ic--s')} Runs your onboarding cadence</span>
+      <span class="chip">${ic('i-shield','ic--s')} Asks before anything binding</span>
+    </div>
+    <div class="rv" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:11px; margin:28px 0; text-align:left">
+      <div class="card" style="padding:19px">${ic('i-clock','ic--l')}<div style="font-size:13.5px; font-weight:700; color:var(--ink); margin-top:10px">Deals don't stall</div><div style="font-size:12px; color:var(--muted); margin-top:5px; line-height:1.55">Your Phoenix deal once sat silent for 3 months. The agent makes that structurally impossible.</div></div>
+      <div class="card" style="padding:19px">${ic('i-arrow','ic--l')}<div style="font-size:13.5px; font-weight:700; color:var(--ink); margin-top:10px">Zero-gap handoff</div><div style="font-size:12px; color:var(--muted); margin-top:5px; line-height:1.55">The minute the agreement signs, onboarding starts. No silence between "congrats" and "let's build."</div></div>
+      <div class="card" style="padding:19px">${ic('i-box','ic--l')}<div style="font-size:13.5px; font-weight:700; color:var(--ink); margin-top:10px">A stocked vendor bench</div><div style="font-size:12px; color:var(--muted); margin-top:5px; line-height:1.55">Formation, lending, insurance, payroll, accounting — introduced exactly when each franchisee needs them.</div></div>
+    </div>
+    <div class="rv" style="display:flex; gap:14px; justify-content:center; align-items:center">
+      <button class="btn btn--dark btn--lg" onclick="next()">Set up my launch system — free ${ic('i-arrow','ic--s')}</button>
+      <button class="mlink" onclick="go(11)">See pricing</button>
+    </div>
+    <div class="rv" style="font-size:12px; color:var(--muted-2); margin-top:13px; font-family:var(--mono)">free setup · ~4 minutes · pay only when the agent works a live deal</div>
+  </div>`;
+}
+
+/* ====================== SCREEN 1 — CLOSING CO-WORK ====================== */
+function visibleClosingSteps() {
+  let steps = STATE.closingSteps.filter(s => STATE.ddOn || s.id !== 'discovery');
+  const out = [];
+  steps.forEach(s => {
+    out.push(s);
+    if (s.id === 'fdd' && STATE.arOn) out.push({ id:'ar', t:'Area Representative agreement', d:'Added because you run AR deals — e-sign step, same approval gate as the FDD', tag:'gate', tagLabel:'You approve', isNew: STATE._justAdded==='ar', mail:{subj:'Your Area Representative agreement', body:'Hi {first_name},\n\nYour AR agreement is prepared alongside the FDD.'} });
+    if (s.id === 'final' && STATE.muOn) out.push({ id:'mu', t:'Multi-unit development schedule', d:'Unit commitments & territory schedule attached to the franchise agreement', tag:'gate', tagLabel:'You approve', isNew: STATE._justAdded==='mu', mail:{subj:'Your development schedule', body:'Hi {first_name},\n\nYour multi-unit development schedule is ready for review.'} });
+  });
+  return out.map((s, i) => ({ ...s, n: i + 1 }));
+}
+function rClosing() {
+  const steps = visibleClosingSteps();
+  const bubble = `I read your FDD and brand profile. Here's how a candidate becomes a <b>Rally &amp; Roam</b> franchisee. <b>Toggle anything that's wrong, click any step to edit it.</b> Everything else is already done.`;
+  return obTop(1) + `<div class="wrap wrap--narrow" style="padding-top:4px">
+    <div class="panda rv">
+      <div class="panda__av"><svg width="22" height="22" viewBox="0 0 26 26"><use href="#i-panda"/></svg></div>
+      <div style="min-width:0">
+        <div class="panda__name">Panda · setting up your launch agent ${ic('i-spark','ic--s')}</div>
+        <div class="panda__bubble" id="pandaB1">${bubble}</div>
+      </div>
+    </div>
+    <div class="rv" style="margin:20px 0 4px"><span class="seclab">A few quick confirms</span></div>
+    <div class="qa-row rv">
+      ${qaChip('ddOn', 'Discovery Day on-site', STATE.ddOn)}
+      <button class="qa-chip sel" onclick="editFee()"><span class="ck">${ic('i-check')}</span> Franchise fee ${fee$()} <span style="opacity:.6">· edit</span></button>
+      ${qaChip('i19On', 'Item 19 shared at evaluation', STATE.i19On)}
+      ${qaChip('arOn', 'Area Representative deals', STATE.arOn)}
+      ${qaChip('muOn', 'Multi-unit agreements', STATE.muOn)}
+    </div>
+    <div class="rv" style="margin:22px 0 9px"><span class="seclab">Your closing flow — drafted, click to edit</span></div>
+    <div class="rv" id="stepList">${steps.map(stepRow).join('')}</div>
+    <div class="hint rv">${ic('i-spark')} <span><b>Notice what you didn't do:</b> write welcome pages, configure e-sign steps, or build a payment wizard. Every step ships configured — the amber gates are the only things that ever wait on you.</span></div>
+    <div class="rv" style="display:flex; gap:14px; align-items:center; margin-top:22px">
+      <button class="btn btn--dark btn--lg" onclick="next()">Looks right — onboarding next ${ic('i-arrow','ic--s')}</button>
+      <button class="mlink" onclick="openStepEditor('fdd')">Try the step editor</button>
+    </div>
+  </div>`;
+}
+function qaChip(key, label, on) {
+  return `<button class="qa-chip ${on?'sel':''}" onclick="toggleQA('${key}')"><span class="ck">${ic('i-check')}</span> ${label}</button>`;
+}
+function stepRow(s) {
+  return `<div class="dstep ${s.isNew?'is-new':''}" onclick="openStepEditor('${s.id}')">
+    <div class="n">${s.n}</div>
+    <div class="dmain"><div class="t">${s.t.replace('$45,000', fee$())}</div><div class="d">${s.d}</div></div>
+    <span class="dstep-edit">${ic('i-edit','ic--s')} edit</span>
+    <span class="tag tag--${s.tag}">${s.tagLabel}</span>
+  </div>`;
+}
+function toggleQA(key) {
+  STATE[key] = !STATE[key];
+  STATE._justAdded = (key==='arOn' && STATE.arOn) ? 'ar' : (key==='muOn' && STATE.muOn) ? 'mu' : null;
+  rerender();
+  if (key==='arOn') toast(STATE.arOn ? 'Area Representative step added after the FDD' : 'AR step removed');
+  if (key==='muOn') toast(STATE.muOn ? 'Multi-unit development schedule added before final signing' : 'Multi-unit step removed');
+  if (key==='ddOn') toast(STATE.ddOn ? 'Discovery Day restored' : 'Discovery Day removed — flow renumbered');
+  STATE._justAdded = null;
+}
+function editFee() {
+  openDrawer(`<div class="drawer__head"><div><div class="dt">Franchise fee</div><div class="ds">Pulled from your FDD Item 5 — used in the payment step, agreements, and agent messaging</div></div><div class="x" onclick="closeAll()">${ic('i-x')}</div></div>
+  <div class="drawer__body">
+    <div class="field"><label>Initial franchise fee</label><input class="input mono" id="feeInput" value="${STATE.fee.toLocaleString('en-US')}" /></div>
+    <div class="hint" style="margin-top:4px">${ic('i-spark')} <span>Changing this updates the payment request, the fee step, the agreement merge field, and every agent message that references it.</span></div>
+  </div>
+  <div class="drawer__foot"><button class="btn btn--dark" onclick="saveFee()">Save fee</button><button class="mlink" onclick="closeAll()">Cancel</button></div>`);
+}
+function saveFee() {
+  const v = parseInt(($id('feeInput').value || '').replace(/[^0-9]/g, ''), 10);
+  if (v) STATE.fee = v;
+  closeAll(); rerender();
+  toast(`Franchise fee updated to ${fee$()} — synced to 4 surfaces`);
+}
+
+/* ---------- THE STEP EDITOR (drawer) ---------- */
+function openStepEditor(id) {
+  const s = visibleClosingSteps().find(x => x.id === id) || STATE.closingSteps.find(x => x.id === id);
+  if (!s) return;
+  const isGate = s.tag === 'gate';
+  openDrawer(`
+  <div class="drawer__head"><div><div class="dt">Edit step</div><div class="ds">Closing flow · step ${s.n || ''} · changes sync to the live template</div></div><div class="x" onclick="closeAll()">${ic('i-x')}</div></div>
+  <div class="drawer__body">
+    <div class="field"><label>Step name</label><input class="input" id="se-name" value="${s.t.replace(/"/g,'&quot;').replace('$45,000', fee$())}" /></div>
+    <div class="field"><label>What happens here</label><textarea class="ta" id="se-desc">${s.d}</textarea></div>
+    <div class="field"><label>Who runs it</label>
+      <div class="seg" id="se-seg">
+        <button class="${s.tag==='auto'?'sel':''}" onclick="segSel(this)">${'Agent runs it'}</button>
+        <button class="${isGate?'sel':''}" onclick="segSel(this)">Agent prepares, I approve</button>
+      </div>
+    </div>
+    <div class="switchrow"><div><div class="sw-t">Pause here until I approve</div><div class="sw-d">The agent stages everything and waits in your queue — nothing sends without your tap.</div></div><button class="switch ${isGate?'on':''}" onclick="this.classList.toggle('on')"></button></div>
+    <div class="switchrow"><div><div class="sw-t">Visible to candidate</div><div class="sw-d">Off = internal step; the candidate's portal skips it silently.</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="field" style="margin-top:18px"><label>The message the agent sends at this step</label>
+      <div class="mailprev">
+        <div class="mp-head"><b>From:</b> Taylor at Rally &amp; Roam &lt;taylor@rallyroam.com&gt;<br/><b>Subject:</b> <input class="input" style="display:inline-block; width:calc(100% - 70px); padding:4px 8px; margin-left:4px; font-size:12px" value="${(s.mail?s.mail.subj:'').replace(/"/g,'&quot;')}" /></div>
+        <div class="mp-body"><span class="mp-tag">${ic('i-spark','ic--s')} agent-drafted · sent in your voice</span>
+          <textarea class="ta" style="box-shadow:none; padding:0; min-height:120px">${s.mail ? s.mail.body.replace('{fee}', fee$()) : ''}</textarea>
+        </div>
+      </div>
+      <div style="font-size:11px; color:var(--muted-2); margin-top:6px; font-family:var(--mono)">merge fields: {first_name} {entity_name} {fee} {cooldown_end}</div>
+    </div>
+  </div>
+  <div class="drawer__foot">
+    <button class="btn btn--dark" onclick="saveStep('${s.id}')">Save step</button>
+    <button class="mlink" onclick="closeAll()">Cancel</button>
+    <span style="margin-left:auto"><button class="mlink" style="color:#c0392b" onclick="toast('Step removal — wired in the build plan, mocked here'); closeAll()">Remove step</button></span>
+  </div>`);
+}
+function segSel(b) { b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); }
+function saveStep(id) {
+  const s = STATE.closingSteps.find(x => x.id === id);
+  if (s) { s.t = $id('se-name').value; s.d = $id('se-desc').value; }
+  closeAll(); rerender();
+  toast('Step updated · synced to the live template and 2 active portals');
+}
+
+/* ====================== SCREEN 2 — ONBOARDING CO-WORK ====================== */
+function rOnboarding() {
+  return obTop(2) + `<div class="wrap wrap--narrow" style="padding-top:4px">
+    <div class="panda rv">
+      <div class="panda__av"><svg width="22" height="22" viewBox="0 0 26 26"><use href="#i-panda"/></svg></div>
+      <div style="min-width:0">
+        <div class="panda__name">Panda · drafting your onboarding roadmap</div>
+        <div class="panda__bubble">Brick-and-mortar social venue with F&amp;B — that's a <b>10-phase, ~26-week</b> path from signing to grand opening. I drafted <b>93 dated tasks plus 6 recurring obligations</b> — real weeks, not prose, so the Gantt and the agent's chasing both work. Click any task to edit it. <b>Drop your ops manual</b> and I'll tighten the draft.</div>
+      </div>
+    </div>
+    <div class="rv" style="display:flex; gap:8px; margin:18px 0 12px; flex-wrap:wrap">
+      <span class="chip">${ic('i-board','ic--s')} 10 phases</span>
+      <span class="chip">${ic('i-check','ic--s')} 93 dated tasks + 6 recurring</span>
+      <span class="chip">${ic('i-cal','ic--s')} every task carries a week</span>
+      <span class="chip" style="cursor:pointer" id="opsChip" onclick="parseOps()">${STATE.opsParsed ? ic('i-check','ic--s')+' Rally_Roam_Ops_v3.pdf parsed' : ic('i-upload','ic--s')+' Upload ops manual'}</span>
+    </div>
+    <div class="rv">${STATE.phases.map(phaseCard).join('')}</div>
+    <div class="rv" style="display:flex; gap:14px; align-items:center; margin-top:22px">
+      <button class="btn btn--dark btn--lg" onclick="next()">Confirm roadmap — vendors next ${ic('i-arrow','ic--s')}</button>
+      <button class="mlink" onclick="openTaskEditor(0,1)">Try editing a task</button>
+    </div>
+  </div>`;
+}
+function phaseCard(p, pi) {
+  return `<div class="phase ${pi===0?'open':''}">
+    <div class="ph-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="ph-n">${p.n}</div>
+      <div style="min-width:0"><div class="ph-t">${p.t}</div><div class="ph-meta">${p.meta}${STATE.opsParsed && pi===4 ? ' · <span style="color:var(--green-deep);font-weight:600">2 tasks refined from your ops manual</span>' : ''}</div></div>
+      <div class="ph-week">${p.wk}</div>
+      <span class="ph-chev">${ic('i-chev')}</span>
+    </div>
+    <div class="ph-body">${p.tasks.map((t, ti) => `
+      <div class="ptask" onclick="openTaskEditor(${pi},${ti})">
+        <span class="bx"></span><span class="pt-t">${t.t}</span>
+        ${t.svc ? `<span class="svc-pill">${t.svc}</span>` : ''}
+        <span class="wk">${t.wk||''}</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+function openTaskEditor(pi, ti) {
+  const p = STATE.phases[pi], t = p.tasks[ti];
+  openDrawer(`
+  <div class="drawer__head"><div><div class="dt">Edit task</div><div class="ds">Phase ${p.n} · ${p.t}</div></div><div class="x" onclick="closeAll()">${ic('i-x')}</div></div>
+  <div class="drawer__body">
+    <div class="field"><label>Task</label><input class="input" id="te-name" value="${t.t.replace(/"/g,'&quot;')}" /></div>
+    <div class="field"><label>Scheduled week</label>
+      <div class="seg"><button onclick="segSel(this)">${t.wk==='W1'?'':''}Week ${String(t.wk||'').replace(/\D/g,'')||'1'}</button><button class="sel" onclick="segSel(this)">Keep: ${t.wk||'W1'}</button><button onclick="segSel(this)">+1 week</button></div>
+    </div>
+    <div class="field"><label>Who's responsible</label>
+      <div class="seg"><button class="sel" onclick="segSel(this)">Franchisee</button><button onclick="segSel(this)">Your team</button><button onclick="segSel(this)">Agent</button></div>
+    </div>
+    <div class="switchrow"><div><div class="sw-t">Require evidence upload</div><div class="sw-d">The agent collects a file/photo and files it before marking done.</div></div><button class="switch ${/insurance|permits|reports|fee/i.test(t.t)?'on':''}" onclick="this.classList.toggle('on')"></button></div>
+    <div class="switchrow"><div><div class="sw-t">Agent chases this task</div><div class="sw-d">Reminders at T-7, T-2, and overdue — stops the moment it's done.</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
+    ${t.svc ? `<div class="svcrow" style="max-width:none">${ic('i-box')}<div><div class="s-t">${t.svc} attached at this moment</div><div class="s-d">Candidate sees it as your recommendation — swap on the Vendor Bench screen</div></div><span class="s-st">Live</span></div>` : ''}
+  </div>
+  <div class="drawer__foot"><button class="btn btn--dark" onclick="saveTask(${pi},${ti})">Save task</button><button class="mlink" onclick="closeAll()">Cancel</button></div>`);
+}
+function saveTask(pi, ti) {
+  STATE.phases[pi].tasks[ti].t = $id('te-name').value;
+  closeAll(); rerender();
+  toast('Task updated · schedule recomputed downstream');
+}
+function parseOps() {
+  if (STATE.opsParsed) return;
+  const chip = $id('opsChip');
+  chip.innerHTML = `${ic('i-clock','ic--s')} Parsing Rally_Roam_Ops_v3.pdf…`;
+  setTimeout(() => {
+    STATE.opsParsed = true; rerender();
+    toast('Ops manual parsed — 6 tasks refined, 2 added in Vendors & technology');
+  }, 1400);
+}
+
+/* ====================== SCREEN 3 — VENDOR BENCH ====================== */
+const VENDORS = [
+  { id:'form', icn:'i-building', col:'var(--violet)', bg:'var(--violet-soft)', t:'CoverPanda Formation', d:'Entity + EIN + operating agreement, filed in days. The franchise agreement needs an entity to sign.', when:'<b>cooldown sprint</b> & onboarding phase 1' },
+  { id:'lend', icn:'i-bank', col:'var(--blue)', bg:'var(--blue-soft)', t:'CoverPanda Lending', d:'SBA, equipment & build-out financing sized to your Item 7 — pre-qualification inside the cooldown.', when:'<b>cooldown</b>, before the franchise fee' },
+  { id:'ins', icn:'i-shield', col:'var(--ember-deep)', bg:'var(--ember-soft)', t:'CoverPanda Insurance', d:'Coverage to brand spec, COI naming you as additional insured — plus renewal tracking forever.', when:'<b>binds at signing</b> & ongoing compliance' },
+  { id:'pay', icn:'i-users', col:'var(--amber)', bg:'var(--amber-soft)', t:'CoverPanda Payroll', d:'Payroll, pay cards & onboarding docs ready before the first hiring event.', when:'<b>vendor phase</b>, pre-hiring · W18' },
+  { id:'acct', icn:'i-chart', col:'var(--green-deep)', bg:'var(--green-soft)', t:'CoverPanda Accounting', d:'Books from lease day one; royalty-ready sales & P&L reports auto-delivered monthly — no chasing uploads.', when:'<b>lease execution</b> & post-opening, forever' },
+];
+function rBench() {
+  return obTop(3) + `<div class="wrap" style="padding-top:4px; max-width:920px">
+    <div class="panda rv">
+      <div class="panda__av"><svg width="22" height="22" viewBox="0 0 26 26"><use href="#i-panda"/></svg></div>
+      <div style="min-width:0">
+        <div class="panda__name">Panda · stocking your vendor bench</div>
+        <div class="panda__bubble">Every franchisee asks the same five questions: <b>who forms my LLC, who lends, who insures, who runs payroll, who does my books?</b> Your bench answers before they ask — each vendor appears at the exact step it's needed. I've stocked it. <b>Toggle any off, or swap in your own.</b></div>
+      </div>
+    </div>
+    <div class="bench rv">
+      ${VENDORS.map(v => STATE.lendingSwapped && v.id==='lend' ? swappedLender() : vendorCard(v)).join('')}
+      <div class="vendor" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; border:1.5px dashed var(--border-2); box-shadow:none; background:transparent; cursor:pointer; min-height:170px" onclick="addVendor(this)">
+        ${ic('i-plus','ic--l')}
+        <h3 style="font-weight:600; margin-top:8px">Add your own vendor</h3>
+        <div class="v-d">POS, suppliers, signage, training — anything your franchisees set up.</div>
+      </div>
+    </div>
+    <div class="hint rv">${ic('i-shield')} <span><b>Your bench, your call.</b> Franchisees always see these as <i>recommendations from you</i>, never ads from us. Swap any slot — the agent routes around it.</span></div>
+    <div class="rv" style="display:flex; gap:14px; align-items:center; margin-top:22px">
+      <button class="btn btn--dark btn--lg" onclick="next()">Bench looks good — review my system ${ic('i-arrow','ic--s')}</button>
+    </div>
+  </div>`;
+}
+function vendorCard(v) {
+  const off = STATE.benchOff[v.id];
+  return `<div class="vendor ${off?'off':''}"><span class="v-badge">Recommended</span>
+    <div class="v-ic" style="background:${v.bg}; color:${v.col}">${ic(v.icn,'ic--l')}</div>
+    <h3>${v.t}</h3><div class="v-d">${v.d}</div>
+    <div class="v-when">${ic('i-clock','ic--s')} Appears: ${v.when}</div>
+    <div class="v-foot"><span class="v-live">Live</span>
+      <span style="display:flex; gap:10px; align-items:center">
+        ${v.id==='lend' ? `<button class="v-swap" onclick="swapLender()">swap</button>` : ''}
+        <button class="btn btn--sm ${off?'btn--ghost':'btn--dark'}" onclick="toggleBench('${v.id}')">${off ? 'Add to bench' : 'On the bench ✓'}</button>
+      </span>
+    </div>
+  </div>`;
+}
+function swappedLender() {
+  return `<div class="vendor" style="box-shadow: var(--blue) 0 0 0 1.5px inset">
+    <div class="v-ic" style="background:var(--blue-soft); color:var(--blue)">${ic('i-bank','ic--l')}</div>
+    <h3>First Peak Bank <span style="font-size:10px; font-weight:700; color:var(--muted-2); letter-spacing:.05em">YOUR LENDER</span></h3>
+    <div class="v-d">Your relationship lender, swapped into the lending slot. The agent now routes pre-quals here and tracks status by email parse.</div>
+    <div class="v-when">${ic('i-clock','ic--s')} Appears: <b>cooldown</b>, before the franchise fee</div>
+    <div class="v-foot"><span class="v-live" style="color:var(--blue)">External</span>
+      <button class="v-swap" onclick="swapLender()">restore CoverPanda Lending</button>
+    </div>
+  </div>`;
+}
+function toggleBench(id) { STATE.benchOff[id] = !STATE.benchOff[id]; rerender(); toast(STATE.benchOff[id] ? 'Removed from bench — the step becomes generic guidance' : 'Back on the bench'); }
+function swapLender() { STATE.lendingSwapped = !STATE.lendingSwapped; rerender(); toast(STATE.lendingSwapped ? 'Lending slot swapped to First Peak Bank — agent re-routed' : 'CoverPanda Lending restored'); }
+function addVendor() { toast('Custom vendor form — wired in the build plan; mocked in v2'); }
+
+/* ====================== SCREEN 4 — REVIEW ====================== */
+function rReview() {
+  const gates = visibleClosingSteps().filter(s => s.tag==='gate').length;
+  return obTop(4) + `<div class="wrap wrap--narrow" style="padding-top:4px">
+    <div class="rv"><span class="eyebrow"><span class="dot"></span> setup elapsed: <span class="mono" id="elapsed">3m 40s</span></span></div>
+    <h1 class="display rv" style="font-size:31px; margin-top:10px">One launch line, qualified to open.</h1>
+    <p class="sub rv">This is the system your Launch Agent will run for every candidate. Portals, agreements, payment requests and vendor intros are <b>built and configured</b> — not templates waiting for homework.</p>
+    <div class="card rv" style="margin-top:20px">
+      <div class="seclab" style="margin-bottom:12px">Closing — agent-run · ${gates} approval gates</div>
+      <div class="tl">
+        <div class="tl-it done"><div class="t">Welcome → Discovery Day</div><div class="d">Agent personalizes, schedules &amp; preps each candidate</div></div>
+        <div class="tl-it agent"><div class="t">FDD &amp; initial signing <span class="tag tag--gate">gate</span></div><div class="d">Prepared from your template — you tap approve</div></div>
+        <div class="tl-it agent"><div class="t">Cooldown → Launch Prep Sprint <span class="tag tag--svc">services</span></div><div class="d">Formation filed · financing pre-qualified · insurance quoted</div></div>
+        <div class="tl-it done"><div class="t">Final agreement &amp; ${fee$()} fee <span class="tag tag--gate">gate</span></div><div class="d">Signed by the new entity; fee collected on-platform</div></div>
+      </div>
+      <div class="seclab" style="margin:16px 0 12px">Onboarding — 10 phases · ~26 weeks · zero-gap handoff</div>
+      <div class="tl">
+        <div class="tl-it done"><div class="t">Day 0: kickoff call already on the calendar</div><div class="d">Scheduled by the agent the moment signing completes</div></div>
+        <div class="tl-it agent"><div class="t">Weeks 1–24: site → lease → build → vendors → hiring</div><div class="d">Agent chases every dated task; payroll &amp; accounting come online mid-stream</div></div>
+        <div class="tl-it now"><div class="t">Week 26: doors open</div><div class="d">Royalties weekly; monthly reports arrive without asking</div></div>
+      </div>
+    </div>
+    <div class="rv" style="display:flex; gap:14px; align-items:center; margin-top:24px">
+      <button class="btn btn--dark btn--lg" onclick="publish()">Publish my launch system ${ic('i-arrow','ic--s')}</button>
+      <button class="mlink" onclick="toast('Preview link copied — share with your team')">Share preview with my team</button>
+    </div>
+    <div class="rv" style="font-size:12px; color:var(--muted-2); margin-top:11px; font-family:var(--mono)">publishing is free · the agent activates per-deal</div>
+  </div>`;
+}
+function publish() { STATE.published = true; confetti(); go(6); }
+
+/* ====================== SCREEN 5 — PUBLISHED PAYOFF ====================== */
+function rPublished() {
+  return `<div class="wrap wrap--narrow" style="text-align:center; padding-top:64px">
+    <div class="rv" style="width:64px; height:64px; border-radius:20px; background:var(--green-soft); display:grid; place-items:center; margin:0 auto; color:var(--green-deep)">${ic('i-check','ic--l')}</div>
+    <h1 class="display rv" style="margin-top:18px">Your launch system is live.</h1>
+    <p class="sub rv" style="max-width:480px; margin-left:auto; margin-right:auto">Closing flow, 26-week roadmap, and vendor bench — published. Every new candidate enters this system from your Lead Inbox.</p>
+    <div class="rv" style="max-width:430px; margin:24px auto 0">
+      <div class="pub-link">${ic('i-link')} <span style="flex:1; text-align:left">rallyroam.coverpanda.co/launch</span>
+        <button class="btn btn--sm btn--light" onclick="toast('Link copied')">${ic('i-copy','ic--s')} Copy</button></div>
+    </div>
+    <div class="rv" style="display:flex; gap:12px; justify-content:center; margin-top:22px">
+      <button class="btn btn--dark btn--lg" onclick="toast('Candidate invite — composer mocked; see build plan')">Invite your first candidate</button>
+      <button class="btn btn--ghost btn--lg" onclick="go(7)">Demo: skip ahead 6 weeks ${ic('i-arrow','ic--s')}</button>
+    </div>
+    ${window.cpJourneyDone ? `<div class="rv" style="margin-top:18px"><button class="btn btn--green btn--lg" onclick="cpJourneyDone('agent')">${ic('i-check','ic--s')} Expand is set up — continue your journey ${ic('i-arrow','ic--s')}</button></div>` : ''}
+    <div class="rv hint" style="max-width:480px; margin:26px auto 0; text-align:left">${ic('i-bot')} <span><b>The agent is watching from here.</b> It runs free in monitor mode until your first live deal — then the per-launch meter starts. Next screen: what the console looks like six weeks in.</span></div>
+  </div>`;
+}
+
+/* ====================== SCREEN 6 — CONSOLE ====================== */
+function spark(vals, color) {
+  const max = Math.max(...vals), pts = vals.map((v, i) => `${(i*44/(vals.length-1)).toFixed(1)},${(20 - v/max*18).toFixed(1)}`).join(' ');
+  return `<svg class="spark" width="44" height="22" viewBox="0 0 44 22"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/></svg>`;
+}
+function rConsole() {
+  const unresolved = STATE.approvals.filter(a => !STATE.resolved[a.id]);
+  const feeMet = STATE.feeApproved ? '$45,000' : '$0';
+  return `<div class="app">${sideNav('agent')}<main class="app__main">
+    <div class="main-head rv">
+      <div><h1>Launch Agent</h1><div class="sub">Working 3 candidates + 1 franchisee · everything below happened without you</div></div>
+      <span class="agent-status"><span class="pulse"></span> Active · last action 24 min ago</span>
+    </div>
+    <div class="mrow rv">
+      <div class="met"><div class="m-l">Projected qualified → signed</div><div class="m-v">39 <small>days</small></div><div class="m-d">${ic('i-check','ic--s')} your last manual deal: 110</div>${spark([110,96,72,54,39],'var(--green)')}</div>
+      <div class="met"><div class="m-l">Deals silent &gt; 5 days</div><div class="m-v">0</div><div class="m-d neutral">longest current gap: 31 hours</div>${spark([4,3,2,1,0],'var(--violet)')}</div>
+      <div class="met"><div class="m-l">Nudges this week</div><div class="m-v">11</div><div class="m-d">${ic('i-check','ic--s')} 9 got responses</div>${spark([3,6,8,9,11],'var(--blue)')}</div>
+      <div class="met"><div class="m-l">Fees collected · June</div><div class="m-v" id="feeMetric">${feeMet}</div><div class="m-d ${STATE.feeApproved?'':'neutral'}" id="feeMetricSub">${STATE.feeApproved ? ic('i-check','ic--s')+' Alex Rivera · today' : 'Alex Rivera staged — in your queue'}</div></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="rv" style="margin-bottom:10px"><span class="seclab">Needs you — ${unresolved.length} item${unresolved.length===1?'':'s'}</span></div>
+        <div class="rv">${STATE.approvals.map(apprCard).join('')}</div>
+        <div class="rv" style="margin:18px 0 10px"><span class="seclab">Pipeline — agent working all four</span></div>
+        <div class="pstrip rv">
+          ${pcol('Evaluation', [pcardC('jordan')])}
+          ${pcol('Cooldown', [pcardC('sam')])}
+          ${pcol('Signing', [pcardC('alex')])}
+          ${pcol('Onboarding', [`<div class="pcard" onclick="go(10)"><div class="pc-top">${av('DP','24')}<div><div class="pc-n">Dana Park</div><div class="pc-s">SLC #1 · week 16 of 26</div></div></div><div class="pc-agent ok"><span class="pd"></span> On schedule · build-out</div></div>`])}
+        </div>
+      </div>
+      <div class="feed rv">
+        <h3>Agent activity — today <span class="mono" style="font-weight:400; text-transform:none; letter-spacing:0">Wed Jun 10</span></h3>
+        <div id="feedList">${STATE.feed.map(f => feedRow(f)).join('')}</div>
+      </div>
+    </div>
+  </main></div>`;
+}
+function pcol(t, cards) { return `<div class="pcol"><div class="pc-h"><span>${t}</span><span>${cards.length}</span></div>${cards.join('')}</div>`; }
+function pcardC(id) {
+  const c = STATE.candidates[id];
+  return `<div class="pcard" onclick="openCand('${id}')"><div class="pc-top">${av(c.ini,'24')}<div><div class="pc-n">${c.name}</div><div class="pc-s">${c.loc}</div></div></div><div class="pc-agent ${c.stClass}"><span class="pd"></span> ${c.stageNote}</div></div>`;
+}
+function feedRow(f) { return `<div class="fd"><div class="fd-ic">${ic(f.icn,'ic--s')}</div><div><div class="fd-tx">${f.tx}</div><div class="fd-tm">${f.tm}</div></div></div>`; }
+function apprCard(a) {
+  const done = STATE.resolved[a.id], held = STATE.held[a.id];
+  const c = STATE.candidates[a.who];
+  return `<div class="appr ${done?'resolved':''} ${held?'held':''}" id="card-${a.id}">
+    <div class="a-head">
+      <div class="a-ic" style="background:${a.icbg}; color:${a.iccol}">${ic(a.icn)}</div>
+      <div style="min-width:0"><div class="a-t">${a.t}</div><div class="a-who">${av(c.ini,'24')} ${a.whoTx}${held?' · <b style="color:var(--amber)">held'+(held===true?'':' '+held)+'</b>':''}</div></div>
+      <span class="a-gate">${a.gate}</span>
+    </div>
+    ${done ? `<div style="font-size:12.5px; font-weight:600; color:var(--green-deep); margin-top:9px; display:flex; gap:7px; align-items:center">${ic('i-check','ic--s')} ${done}</div>` : `
+    <div class="a-body">${a.body}</div>
+    <div class="a-actions">
+      <button class="btn btn--sm ${a.id==='a2'?'btn--green':'btn--dark'}" onclick="${a.id==='a3' ? `openDraftReply()` : `approveItem('${a.id}')`}">${a.approveLabel}</button>
+      <button class="btn btn--sm btn--ghost" onclick="openReview('${a.review}')">${a.review==='packet'?'Review packet':a.review==='agreement'?'View agreement':"See the question"}</button>
+      <span style="margin-left:auto; position:relative">
+        <button class="mlink" onclick="openHold(event,'${a.id}')">Hold</button>
+        <div class="pop" id="pop-${a.id}" style="right:0; top:26px">
+          <div class="p-t">Hold this item</div>
+          <div class="p-d">The agent pauses related sends and tells the candidate a considered answer is coming — no ghosting.</div>
+          <div class="p-opt" onclick="holdItem('${a.id}','48h')">${ic('i-clock','ic--s')} Hold 48 hours · auto-resurface</div>
+          <div class="p-opt" onclick="holdItem('${a.id}','1 week')">${ic('i-cal','ic--s')} Hold 1 week</div>
+          <div class="p-opt" onclick="holdItem('${a.id}','until I say')">${ic('i-pause','ic--s')} Hold until I say — agent checks in Fridays</div>
+        </div>
+      </span>
+    </div>`}
+  </div>`;
+}
+function openHold(e, id) { e.stopPropagation(); document.querySelectorAll('.pop.on').forEach(p => p.classList.remove('on')); $id('pop-'+id).classList.add('on'); $id('scrim').classList.add('on'); }
+function holdItem(id, dur) {
+  STATE.held[id] = dur; closeAll(); rerender();
+  toast(`Held ${dur} — candidate told a considered answer is coming`, () => { delete STATE.held[id]; rerender(); });
+}
+function approveItem(id) {
+  const a = STATE.approvals.find(x => x.id === id);
+  STATE.resolved[id] = a.approveMsg;
+  if (id === 'a2') { STATE.feeApproved = true; }
+  closeAll(); rerender();
+  if (id === 'a2') {
+    animateFee();
+    toast('$45,000 collected from Rivera Social Ventures LLC', () => { delete STATE.resolved[id]; STATE.feeApproved = false; rerender(); }, 'Watch the handoff replay →', () => go(9));
+    STATE.feed.unshift({ icn:'i-dollar', tx:'<b>$45,000 collected</b> · Alex Rivera → onboarding handoff started', tm:'just now' });
+  } else if (id === 'a1') {
+    toast('FDD sent to Jordan · 14-day clock started', () => { delete STATE.resolved[id]; rerender(); });
+    STATE.feed.unshift({ icn:'i-send', tx:'<b>FDD packet sent</b> to Jordan Mills · cooldown sprint scheduled', tm:'just now' });
+  }
+}
+function animateFee() {
+  const el = $id('feeMetric'); if (!el) return;
+  let v = 0; const tgt = 45000;
+  const iv = setInterval(() => { v += 2500; if (v >= tgt) { v = tgt; clearInterval(iv); } el.textContent = '$' + v.toLocaleString('en-US'); }, 28);
+}
+function openCand(id) { currentCand = id; candTab = 'tl'; go(8); }
+
+/* ---------- review modals ---------- */
+function openReview(kind) {
+  if (kind === 'packet') {
+    openModal(`<div class="m-head"><div><div class="mt">FDD packet — Jordan Mills</div><div class="ms">Template v4 · Mar 2026 · 246 pages · prepared by the agent, held for you</div></div><div class="x" onclick="closeAll()">${ic('i-x')}</div></div>
+    <div class="m-body">
+      <div class="doc"><div class="doc-tag">Franchise Disclosure Document</div><h4>Rally &amp; Roam Pickleball Social Club</h4><div class="doc-sub">Issued March 2026 · Item 5 fee ${fee$()} · Item 7 range $312,000 – $648,000</div>
+      <div class="doc-line w85"></div><div class="doc-line"></div><div class="doc-line w72"></div><div class="doc-line w60"></div></div>
+      <div style="margin-top:14px"><div class="seclab" style="margin-bottom:8px">The email that goes with it</div>
+        <div class="mailprev"><div class="mp-head"><b>To:</b> jordan.mills@gmail.com · <b>From:</b> Taylor at Rally &amp; Roam<br/><b>Subject:</b> Your Franchise Disclosure Document</div>
+        <div class="mp-body"><span class="mp-tag">${ic('i-spark','ic--s')} agent-drafted · your voice</span><p>Hi Jordan,</p><p>Attached is Rally &amp; Roam's FDD (v4, March 2026). By federal rule you'll have it at least 14 days before anything can be signed — use that window well: I'll guide you through a launch-prep sprint so day 15 is a formality.</p><p>— Taylor</p></div></div>
+      </div>
+    </div>
+    <div class="m-foot"><button class="btn btn--dark" onclick="approveItem('a1')">Approve &amp; send</button><button class="mlink" onclick="closeAll()">Close</button></div>`);
+  } else if (kind === 'agreement') {
+    openModal(`<div class="m-head"><div><div class="mt">Franchise agreement — executed</div><div class="ms">Signed 9:14 AM today · entity verified against AZ records 8:55 AM</div></div><div class="x" onclick="closeAll()">${ic('i-x')}</div></div>
+    <div class="m-body"><div class="doc"><div class="doc-tag">Franchise Agreement · Unit 1</div><h4>Rivera Social Ventures LLC</h4><div class="doc-sub">Phoenix, AZ territory · term 10 years · fee ${fee$()}</div>
+      <div class="doc-line w72"></div><div class="doc-line w85"></div><div class="doc-line w60"></div>
+      <div class="doc-sig"><div class="sigbox" style="background:var(--green-soft); color:var(--green-deep)">✓ A. Rivera · 9:14 AM</div><div class="sigbox" style="background:var(--green-soft); color:var(--green-deep)">✓ T. Byington · 9:14 AM</div></div></div>
+    </div>
+    <div class="m-foot"><button class="btn btn--green" onclick="approveItem('a2')">Approve &amp; collect ${fee$()}</button><button class="mlink" onclick="closeAll()">Close</button></div>`);
+  } else {
+    openDraftReply();
+  }
+}
+function openDraftReply() {
+  openModal(`<div class="m-head"><div><div class="mt">Draft reply — Sam's territory question</div><div class="ms">Agent paused Sam's cadence 8:42 AM · drafted from FDD Item 12</div></div><div class="x" onclick="closeAll()">${ic('i-x')}</div></div>
+  <div class="m-body">
+    <div class="msg"><div>${av('SO','30')}</div><div class="m-wrap"><div class="m-bubble">"My brother lives in Oro Valley. Could the protected territory stretch that far?"</div><div class="m-meta">Today · 8:41 AM</div></div></div>
+    <div class="seclab" style="margin:6px 0 8px">Agent's talking points · FDD Item 12</div>
+    <div class="hint" style="margin:0 0 12px">${ic('i-file')} <span>Protected radius is <b>5 miles or 50,000 population</b>, whichever is smaller · Oro Valley sits 11 miles from Sam's proposed site · adjacent-territory rights of first refusal exist under §12.3 — that's a real option you can offer.</span></div>
+    <div class="field"><label>Your reply — edit freely, sends from your name</label>
+      <textarea class="ta" style="min-height:130px">Hi Sam — great question. Your protected territory runs 5 miles from your site, so Oro Valley would sit outside it. But §12.3 gives you a right of first refusal on adjacent territory — if Oro Valley opens up, you'd hear about it before anyone else. Happy to walk through the map on a call this week.</textarea>
+    </div>
+  </div>
+  <div class="m-foot"><button class="btn btn--dark" onclick="sendReply()">${ic('i-send','ic--s')} Send reply &amp; resume cadence</button><button class="mlink" onclick="closeAll()">Keep editing later</button></div>`);
+}
+function sendReply() {
+  STATE.resolved['a3'] = 'Reply sent · Sam\'s cadence resumed';
+  STATE.candidates.sam.stageNote = 'Sprint resumed · signs Jun 18'; STATE.candidates.sam.stClass = 'ok';
+  STATE.feed.unshift({ icn:'i-msg', tx:'Your reply on <b>territory</b> sent to Sam · cooldown cadence resumed', tm:'just now' });
+  closeAll(); rerender();
+  toast('Reply sent in your voice · Sam\'s cadence resumed');
+}
+
+/* ====================== SCREEN 7 — CANDIDATE RECORD ====================== */
+function rCandidate() {
+  const c = STATE.candidates[currentCand];
+  const tabs = `<div class="seg" style="margin-bottom:16px">
+    <button class="${candTab==='tl'?'sel':''}" onclick="candTab='tl';rerender()">Timeline</button>
+    <button class="${candTab==='msg'?'sel':''}" onclick="candTab='msg';rerender()">Messages <span class="mono" style="font-size:10px">${c.msgs.length}</span></button>
+  </div>`;
+  const tl = `<div class="card rv"><div class="tl">${c.tl.map(it => `
+    <div class="tl-it ${it.cls}">
+      <div class="t">${it.t} ${(it.tags||[]).map(tg => `<span class="tag tag--${tg==='agent'?'auto':tg==='svc'?'svc':tg==='gate'?'gate':'you'}">${tg==='agent'?'agent':tg==='svc'?'services':tg==='gate'?'your gates':'needs you'}</span>`).join('')}</div>
+      <div class="d">${it.d}</div>
+      ${(it.svcs||[]).map(s => `<div class="svcrow"><div class="s-ic">${ic(s.icn,'ic--s')}</div><div><div class="s-t">${s.t}</div><div class="s-d">${s.d}</div></div><span class="s-st">${s.st}</span></div>`).join('')}
+      <div class="tm">${it.tm}</div>
+    </div>`).join('')}</div></div>`;
+  const msgs = `<div class="card rv" style="background:var(--panel); box-shadow:none">${c.msgs.map(m => `
+    <div class="msg ${m.out?'out':''}">
+      <div>${m.out ? `<span class="av av--30" style="background:var(--ink)"><svg width="16" height="16" viewBox="0 0 26 26"><use href="#i-panda"/></svg></span>` : av(c.ini,'30')}</div>
+      <div class="m-wrap"><div class="m-bubble">${m.tx}</div><div class="m-meta">${m.agent?'<span class="agent-chip">agent · your voice</span>':''} ${m.tm}</div></div>
+    </div>`).join('')}
+    <div style="display:flex; gap:9px; margin-top:6px"><input class="input" placeholder="Jump in as Taylor — the agent steps back while you type…" style="flex:1" onclick="toast('Direct compose — wired in build plan')"/><button class="btn btn--dark btn--sm" onclick="toast('Direct compose — wired in build plan')">${ic('i-send','ic--s')}</button></div>
+  </div>`;
+  return `<div class="app">${sideNav('agent', { backTo:6, section:'Candidate', items:[
+      { icn:'i-clock', l:'Timeline', on:candTab==='tl', fn:"candTab='tl';rerender()" },
+      { icn:'i-msg', l:'Messages', on:candTab==='msg', fn:"candTab='msg';rerender()" },
+      { icn:'i-file', l:'Files & agreements' }, { icn:'i-box', l:'Services' } ] })}
+    <main class="app__main">
+    <div class="main-head rv">
+      <div><span class="eyebrow"><span class="dot"></span> ${c.head}</span>
+        <h1 style="margin-top:8px; display:flex; align-items:center; gap:11px">${av(c.ini,'38')} ${c.name} — ${c.loc}</h1>
+        <div class="sub">${c.sub}</div></div>
+      <div style="display:flex; gap:9px">
+        <button class="btn btn--light btn--sm" onclick="candTab='msg';rerender()">${ic('i-msg','ic--s')} Messages</button>
+        <button class="btn btn--dark btn--sm" onclick="closeSel=null;go(12)">${ic('i-rocket','ic--s')} See their portal</button>
+      </div>
+    </div>
+    <div class="rv">${tabs}</div>
+    ${candTab==='tl' ? tl : msgs}
+    ${currentCand==='sam' && candTab==='tl' ? `<div class="hint rv">${ic('i-spark')} <span><b>This is the redesign in one screen.</b> The old cooldown was a static page and months of silence. The sprint makes day 15 a formality — and every service the candidate set up is one your brand recommended.</span></div>` : ''}
+  </main></div>`;
+}
+
+/* ====================== SCREEN 12 — CANDIDATE CLOSING PORTAL ====================== */
+function rClosePortal() {
+  const c = STATE.candidates[currentCand];
+  const steps = STATE.closingSteps;                       // 7 steps: welcome..handoff
+  const activeIdx = ({ jordan: 2, sam: 3, alex: 5 })[currentCand];
+  const sel = closeSel === null ? activeIdx : closeSel;
+  const ss = steps[sel];
+  const COPY = {
+    welcome: `Your private portal is open. Watch the 3-minute brand film and meet your launch assistant — nothing is required from you yet.`,
+    discovery: `Discovery Day is set. Your assistant handled flights-to-door logistics and sent your prep packet. Just show up — the unit-economics one-pager is worth ten minutes on the flight.`,
+    fdd: `Your Franchise Disclosure Document is here. By federal rule you get at least 14 days with it before anything can be signed — your assistant uses that window to run a launch-prep sprint, so day 15 is a formality, not a scramble.`,
+    cooldown: `The 14-day disclosure window, made productive. None of this binds you — it just clears the runway so signing day is instant:`,
+    final: `Your franchise agreement is ready to sign — by your new entity, with everything verified. One tap, and it's done.`,
+    feepay: `Your franchise fee — one secure transfer, and your onboarding begins the same minute. No invoice, no wire instructions to decode.`,
+    handoff: `Welcome to the family. Your onboarding portal opens with every milestone dated from today, and your kickoff call is already on the calendar.`,
+  };
+  const sprint = (c.tl.find(it => it.svcs) || {}).svcs || [
+    { icn: 'i-building', t: 'Form your operating entity', d: 'CoverPanda Formation · EIN in days', st: 'Ready' },
+    { icn: 'i-bank', t: 'Pre-qualify your financing', d: 'CoverPanda Lending · no hard credit pull', st: 'Ready' },
+    { icn: 'i-shield', t: 'Quote insurance to brand spec', d: 'CoverPanda Insurance · binds at signing', st: 'Ready' },
+  ];
+
+  const stepper = steps.map((s, i) => {
+    const state = i < activeIdx ? 'done' : i === activeIdx ? 'active' : 'up';
+    const dot = state === 'done' ? 'var(--green)' : state === 'active' ? 'var(--ember)' : 'var(--border-2)';
+    const dotBg = state === 'done' ? 'var(--green-soft)' : state === 'active' ? 'var(--ember-soft)' : 'var(--panel)';
+    const dotCol = state === 'done' ? 'var(--green-deep)' : state === 'active' ? 'var(--ember-deep)' : 'var(--muted-2)';
+    const subt = state === 'done' ? 'Done' : state === 'active' ? (currentCand === 'sam' && s.id === 'cooldown' ? 'Day 6 of 14' : 'Happening now') : 'Up next';
+    const ring = i === sel ? 'box-shadow:0 0 0 1.5px var(--ink) inset;' : 'box-shadow:var(--inset-2);';
+    return `<div onclick="closeSel=${i};rerender()" style="display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;background:var(--card);${ring}cursor:pointer;margin-bottom:8px;transition:box-shadow .14s">
+      <span style="width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700;background:${dotBg};color:${dotCol}">${state === 'done' ? '✓' : s.n}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--ink)">${s.t}</div><div style="font-size:11px;color:${state === 'active' ? 'var(--ember-deep)' : 'var(--muted)'};font-weight:${state === 'active' ? '600' : '400'}">${subt}</div></div>
+    </div>`;
+  }).join('');
+
+  const stState = sel < activeIdx ? 'Done' : sel === activeIdx ? 'Happening now' : 'Up next';
+  const stCol = sel < activeIdx ? 'green' : sel === activeIdx ? 'ember' : 'muted';
+  let detail = `<div style="display:flex;align-items:center;gap:9px"><span class="tag tag--${sel < activeIdx ? 'auto' : sel === activeIdx ? 'gate' : 'svc'}">${stState}</span>${steps[sel].tag === 'gate' ? `<span style="font-size:11px;color:var(--muted)">your approval, one tap</span>` : steps[sel].tag === 'svc' ? `<span style="font-size:11px;color:var(--muted)">services moment</span>` : `<span style="font-size:11px;color:var(--muted)">your assistant runs this</span>`}</div>
+    <h2 class="display" style="font-size:23px;margin:11px 0 0">${ss.t}</h2>
+    <p class="sub" style="margin-top:8px">${COPY[ss.id]}</p>`;
+  if (ss.id === 'cooldown') {
+    detail += `<div style="margin-top:15px">${sprint.map(s => `<div class="svcrow"><div class="s-ic">${ic(s.icn, 'ic--s')}</div><div><div class="s-t">${s.t}</div><div class="s-d">${s.d}</div></div><span class="s-st">${s.st}</span></div>`).join('')}</div>
+      <div class="hint" style="margin-top:14px">${ic('i-shield')} <span>Nothing here signs or charges anything. It's preparation — so the moment your window closes, you're ready to open, not starting over.</span></div>`;
+  } else if (ss.id === 'feepay') {
+    detail += `<div class="card" style="margin-top:15px;box-shadow:var(--inset-2)"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:12px;color:var(--muted)">Franchise fee</div><div class="display" style="font-size:26px;color:var(--ink)">${fee$()}</div></div><div style="font-size:12px;color:var(--muted);text-align:right">via CoverPanda Payments<br/>onboarding starts the same minute</div></div></div>`;
+  }
+
+  return `<div style="min-height:100vh;background:var(--bg)">
+    <div style="background:var(--ink);color:#fff;padding:13px 22px;display:flex;align-items:center;gap:11px">
+      <span class="av av--30" style="background:#262420"><svg width="15" height="15" viewBox="0 0 26 26"><use href="#i-panda"/></svg></span>
+      <div><div style="font-size:13.5px;font-weight:700">Rally &amp; Roam · your path to ownership</div><div style="font-size:11px;color:#b9b5ad">a private portal for ${c.name} · run by your launch assistant</div></div>
+      <span style="margin-left:auto;font-size:11px;color:#b9b5ad;font-family:var(--mono)">candidate's view</span>
+    </div>
+    <div class="wrap" style="max-width:1000px;padding-top:24px">
+      <div class="rv" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div><span class="eyebrow"><span class="dot"></span> ${c.head}</span>
+          <h1 style="margin-top:8px;display:flex;align-items:center;gap:11px">${av(c.ini, '38')} ${c.name}</h1>
+          <div class="sub" style="margin-top:2px">${c.sub}</div></div>
+        <button class="btn btn--light btn--sm" onclick="go(8)">← Back to the brand's console</button>
+      </div>
+      <div class="rv" style="display:grid;grid-template-columns:320px 1fr;gap:22px;margin-top:22px">
+        <div><div class="seclab" style="margin-bottom:11px">Your closing path · tap any step</div>${stepper}</div>
+        <div class="card">${detail}</div>
+      </div>
+      <div class="hint rv" style="margin-top:18px">${ic('i-spark')} <span><b>You always know where you stand.</b> Your brand sees this exact progress in their console — so when something needs a human (like a territory question), it goes straight to them, and your assistant tells you it's handled. No black box, no chasing.</span></div>
+    </div>
+  </div>`;
+}
+
+/* ====================== SCREEN 8 — HANDOFF REPLAY ====================== */
+const REPLAY_ROWS = [
+  { tm:'9:14:07', icn:'i-sign', tx:'<b>Final agreement executed</b> by Rivera Social Ventures LLC — both signatures verified' },
+  { tm:'9:14:09', icn:'i-dollar', tx:'$45,000 payment request <b>staged to Taylor\'s queue</b> — money gate, holds for approval' },
+  { tm:'9:15:00', icn:'i-shield', tx:'Insurance <b>bound at signature</b> · COI naming Rally &amp; Roam filed to compliance' },
+  { tm:'≈9:18', icn:'i-check', tx:'<b>Taylor approves</b> · fee collected via CoverPanda Payments <span style="color:#8d897f">(the gate held until you tapped)</span>' },
+  { tm:'9:18:04', icn:'i-rocket', tx:'<b>Onboarding portal opened</b> — 10 phases, 93 tasks, every date computed from today' },
+  { tm:'9:18:05', icn:'i-cal', tx:'<b>Kickoff call booked</b>: Taylor + Alex, Thursday 9:00 AM — both calendars confirmed' },
+  { tm:'9:18:06', icn:'i-box', tx:'Vendor bench staged — payroll queued to W18, accounting to lease day' },
+  { tm:'9:18:09', icn:'i-send', tx:'Welcome note sent <b>in Taylor\'s voice</b>: "It\'s official — see you Thursday at 9."' },
+];
+function rReplay() {
+  return `<div class="wrap wrap--narrow" style="padding-top:46px">
+    <div class="rv" style="text-align:center"><span class="eyebrow" style="justify-content:center"><span class="dot"></span> activity replay · this morning</span>
+      <h1 class="display" style="margin-top:12px">Four minutes of silence.<br/>Not three months.</h1>
+      <p class="sub" style="max-width:500px; margin:12px auto 0">What happened when Alex Rivera signed — including the one moment that waited for you.</p>
+    </div>
+    <div class="replay rv" style="margin-top:26px">
+      <div class="rp-head"><span class="av av--24" style="background:#262420"><svg width="14" height="14" viewBox="0 0 26 26"><use href="#i-panda"/></svg></span>
+        <div><div class="rp-title">Signed → onboarding · Alex Rivera</div><div class="rp-sub">Wed Jun 10 · replay ${STATE.feeApproved ? '· fee approved at 9:18' : '· fee still in your queue — approve it on the console'}</div></div>
+        <button class="btn btn--sm btn--light" style="margin-left:auto" onclick="playReplay()">↻ Replay</button>
+      </div>
+      <div id="replayRows">${REPLAY_ROWS.map(r => `<div class="rp-row"><div class="rp-tm">${r.tm}</div><div class="rp-ic">${ic(r.icn,'ic--s')}</div><div class="rp-tx">${r.tx}</div></div>`).join('')}</div>
+    </div>
+    <div class="rv" style="display:flex; gap:13px; justify-content:center; margin-top:24px">
+      <button class="btn btn--dark btn--lg" onclick="go(10)">Follow a franchisee through onboarding ${ic('i-arrow','ic--s')}</button>
+      <button class="mlink" onclick="go(7)">Back to console</button>
+    </div>
+  </div>`;
+}
+function playReplay() {
+  document.querySelectorAll('#replayRows .rp-row').forEach((r, i) => {
+    r.classList.remove('shown'); void r.offsetWidth;
+    setTimeout(() => r.classList.add('shown'), 250 + i * 420);
+  });
+}
+
+/* ====================== SCREEN 9 — DANA / ONBOARDING ====================== */
+function rDana() {
+  return `<div class="app">${sideNav('agent', { backTo:6, section:'Franchisee', items:[
+      { icn:'i-clock', l:'Timeline', on:true, fn:'rerender()' },
+      { icn:'i-check', l:'Tasks · 93' }, { icn:'i-box', l:'Services' }, { icn:'i-file', l:'Files' } ] })}
+    <main class="app__main">
+    <div class="main-head rv">
+      <div><span class="eyebrow"><span class="dot"></span> Onboarding · week 16 of 26 · phase 4: design &amp; build-out</span>
+        <h1 style="margin-top:8px; display:flex; align-items:center; gap:11px">${av('DP','38')} Dana Park — SLC #1</h1>
+        <div class="sub">Signed Feb 18 · projected open <b>Aug 21</b> · 2 days ahead of plan</div></div>
+      <span class="agent-status"><span class="pulse"></span> Agent on schedule</span>
+    </div>
+    ${connStrip()}
+    <div class="card rv">
+      <div class="tl">
+        <div class="tl-it done"><div class="t">Phases 1–3 complete <span class="tag tag--auto">agent-chased</span></div><div class="d">Entity ✓ · financing funded ✓ · site approved ✓ · lease executed Apr 10. <b>27 tasks closed</b>; you only touched the two site-approval gates.</div><div class="tm">Feb 18 — Apr 10 · W1–8</div></div>
+        <div class="tl-it done"><div class="t">Accounting switched on at lease signing <span class="tag tag--svc">service</span></div><div class="d">Books opened before the first construction invoice — every build cost lands categorized from day one.</div>
+          <div class="svcrow"><div class="s-ic">${ic('i-chart','ic--s')}</div><div><div class="s-t">CoverPanda Accounting — active</div><div class="s-d">Monthly P&amp;L to Dana · royalty-ready sales reports to you, automatically</div></div><span class="s-st">Live ✓</span></div>
+        <div class="tm">Apr 10 · W8</div></div>
+        <div class="tl-it agent"><div class="t">Build-out — agent riding the schedule <span class="tag tag--auto">agent</span></div><div class="d">Bi-weekly GC photo updates collected &amp; filed · permit milestone confirmed with the city portal · flagged a 4-day HVAC slip and pulled the inspection forward to absorb it.</div><div class="tm">Now · W16 of W12–22</div></div>
+        <div class="tl-it"><div class="t">W18: payroll before the first hire <span class="tag tag--svc">service</span></div><div class="d">CoverPanda Payroll queued — accounts, pay cards &amp; onboarding docs ready the day Dana posts the GM role.</div></div>
+        <div class="tl-it"><div class="t">W24: insurance binds at certificate of occupancy <span class="tag tag--svc">service</span></div><div class="d">COI naming Rally &amp; Roam auto-filed to your compliance tab — renewal-tracked every year after.</div></div>
+        <div class="tl-it now"><div class="t">W26: grand opening <span class="tag tag--gate">your gate</span></div><div class="d">Final brand approval to open stays yours. After that: weekly royalties, monthly reports — all automatic.</div><div class="tm">Aug 21 · projected</div></div>
+      </div>
+    </div>
+    ${pathBHandoff()}
+    <div class="hint rv">${ic('i-chart')} <span><b>After opening, the agent doesn't leave.</b> It becomes the operating cadence: royalty collection, report delivery, COI renewals, audit prep. That's also where accounting &amp; payroll revenue compounds for years.</span></div>
+  </main></div>`;
+}
+
+/* connectivity "comes online" strip — the franchisee's connections, mid-onboarding */
+function connStrip() {
+  const conn = [
+    { icn:'i-building', l:'Entity', s:'Park Hospitality LLC', c:'var(--violet)', cs:'var(--violet-soft)', live:true },
+    { icn:'i-bank', l:'Bank & cash', s:'Operating account funded', c:'var(--amber)', cs:'var(--amber-soft)', live:true },
+    { icn:'i-dollar', l:'Financing', s:'$420K funded', c:'var(--green)', cs:'var(--green-soft)', live:true },
+    { icn:'i-chart', l:'Books · QuickBooks', s:'Live since lease signing', c:'var(--green)', cs:'var(--green-soft)', live:true },
+    { icn:'i-box', l:'POS & tech', s:'Installs week 17', c:'var(--blue)', cs:'var(--blue-soft)', live:false },
+    { icn:'i-users', l:'Payroll', s:'Arms before first hire · W18', c:'var(--amber)', cs:'var(--amber-soft)', live:false },
+    { icn:'i-shield', l:'Insurance', s:'Binds at C of O · W24', c:'var(--blue)', cs:'var(--blue-soft)', live:false },
+  ];
+  const liveN = conn.filter(c => c.live).length;
+  const chips = conn.map(c => `
+    <div style="flex:1 1 152px; min-width:140px; background:var(--card); border-radius:13px; padding:11px 12px;
+      box-shadow:${c.live ? `0 0 0 1.5px ${c.c} inset, 0 6px 16px -10px ${c.c}` : 'var(--inset-2)'};
+      border:${c.live ? '0' : '1.4px dashed var(--border-2)'}; ${c.live ? '' : 'opacity:.9'}">
+      <div style="display:flex; align-items:center; justify-content:space-between">
+        <div style="width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:${c.live ? c.cs : 'var(--panel)'}; color:${c.live ? c.c : 'var(--muted-2)'}">${ic(c.live ? 'i-check' : c.icn, 'ic--s')}</div>
+        <span style="font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:${c.live ? c.c : 'var(--muted-2)'}">${c.live ? 'Live' : 'Queued'}</span>
+      </div>
+      <div style="font-size:12.5px; font-weight:700; color:var(--ink); margin-top:8px">${c.l}</div>
+      <div style="font-size:10.5px; color:var(--muted); margin-top:1px; line-height:1.35">${c.s}</div>
+    </div>`).join('');
+  return `<div class="card rv" style="margin-bottom:8px">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:13px; flex-wrap:wrap">
+      <div class="seclab">Dana's unit — coming online</div>
+      <span style="font-size:11px; color:var(--muted-2)">the franchisee's connectivity view · <b style="color:var(--green-deep)">${liveN} of ${conn.length} live</b></span>
+      <span style="margin-left:auto; font-size:11px; color:var(--muted)">${ic('i-link','ic--s')} every connection here also feeds your network roll-up →</span>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap">${chips}</div>
+  </div>`;
+}
+
+/* the seam — post-open, this unit rolls into the Financial OS (Path B) */
+function pathBHandoff() {
+  const units = [
+    { u:'SLC flagship', who:'Corporate', rev:'$58,240', st:'live' },
+    { u:'Boise #1', who:'Jordan Mills', rev:'$41,710', st:'live' },
+    { u:'Phoenix #1', who:'Alex Rivera', rev:'$47,930', st:'live' },
+    { u:'SLC #1', who:'Dana Park', rev:'joins Aug 21', st:'pending' },
+  ];
+  const rows = units.map(u => `
+    <div style="display:flex; align-items:center; gap:11px; padding:10px 0; border-bottom:1px solid #f4f1ec; ${u.st==='pending'?'':''}">
+      <div style="width:7px; height:7px; border-radius:50%; background:${u.st==='live'?'var(--green)':'var(--amber)'}; flex:none"></div>
+      <div style="flex:1"><span style="font-size:13px; font-weight:600; color:var(--ink)">${u.u}</span>
+        <span style="font-size:11.5px; color:var(--muted)"> · ${u.who}</span></div>
+      <div style="font-family:var(--mono); font-size:12.5px; color:${u.st==='live'?'var(--ink)':'var(--amber)'}; font-weight:${u.st==='live'?'500':'600'}">${u.rev}</div>
+    </div>`).join('');
+  return `<div class="card rv" style="margin-top:16px; box-shadow:0 0 0 1.5px var(--green) inset, var(--inset-2)">
+    <div style="display:flex; align-items:center; gap:9px; margin-bottom:6px">
+      <span class="seclab" style="color:var(--green-deep)">The seam · post-open</span>
+      <span style="font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--violet); background:var(--violet-soft); border-radius:99px; padding:3px 9px">Financial OS · Path B</span>
+    </div>
+    <h2 class="display" style="font-size:21px; color:var(--ink); margin-bottom:6px">When Dana opens, this unit rolls into your Financial OS.</h2>
+    <p class="sub" style="max-width:560px; margin-bottom:15px">The same QuickBooks Dana connected during onboarding becomes a live column in your consolidated P&amp;L — no new setup, no data request, no spreadsheet. Her unit economics join the network the day the doors open.</p>
+    <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:18px; align-items:start">
+      <div>
+        <div class="seclab" style="margin-bottom:4px">Your network consolidation</div>
+        ${rows}
+        <div style="display:flex; align-items:center; gap:11px; padding:11px 0 2px">
+          <div style="flex:1; font-size:12.5px; font-weight:700; color:var(--ink)">System revenue · monthly</div>
+          <div style="font-family:var(--mono); font-size:14px; font-weight:600; color:var(--green-deep)">$147,880 <span style="color:var(--muted); font-weight:400">+ SLC #1 soon</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="svcrow" style="margin-top:0"><div class="s-ic">${ic('i-chart','ic--s')}</div><div><div class="s-t">QuickBooks → consolidation</div><div class="s-d">Dana's books map to your chart of accounts automatically</div></div></div>
+        <div class="svcrow"><div class="s-ic">${ic('i-shield','ic--s')}</div><div><div class="s-t">COI + compliance on file</div><div class="s-d">No chasing — it filed itself at bind</div></div></div>
+        <button class="btn btn--dark btn--block" style="margin-top:12px" onclick="window.location.href='financial-os-prototype.html'">Open the consolidated view ${ic('i-arrow','ic--s')}</button>
+        <div style="text-align:center; font-size:11px; color:var(--muted-2); margin-top:8px; font-family:var(--mono)">Path A onboarding → Path B Financial OS</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ====================== SCREEN 10 — PRICING + DIGEST ====================== */
+function rPricing() {
+  return `<div class="wrap" style="max-width:960px">
+    <div class="rv" style="text-align:center; margin-bottom:30px">
+      <span class="eyebrow" style="justify-content:center"><span class="dot"></span> packaging</span>
+      <h1 class="display" style="font-size:33px; margin-top:11px">Free to set up. Paid when it works.</h1>
+      <p class="sub" style="max-width:540px; margin:10px auto 0">Setup is a free platform feature — every brand publishes a launch system. The agent is the SKU, and it charges the way it delivers value: per launch.</p>
+    </div>
+    <div class="rv" style="display:grid; grid-template-columns:1fr 1.2fr; gap:16px; align-items:start">
+      <div class="price-card" style="box-shadow: 0 0 0 2px var(--ink) inset">
+        <div class="seclab">Launch Agent</div>
+        <div class="pr-n" style="margin-top:8px">$750 <span>per signed franchisee</span></div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:4px">+ $99/mo only while 3+ candidates are active · never per-seat</div>
+        <div style="margin-top:13px">
+          <div class="tick">${ic('i-check','ic--s')} Runs closing + onboarding for unlimited candidates</div>
+          <div class="tick">${ic('i-check','ic--s')} Charged only when the franchise fee actually collects</div>
+          <div class="tick">${ic('i-check','ic--s')} Auto-deducted from the fee flow — no separate invoice</div>
+          <div class="tick">${ic('i-check','ic--s')} ~1.7% of a ${fee$()} fee · if they don't sign, you don't pay</div>
+        </div>
+        <button class="btn btn--dark btn--block" style="margin-top:15px" onclick="toast('Activation flow — see pricing strategy doc for the four upgrade triggers')">Activate on next deal</button>
+        <div style="text-align:center; margin-top:10px"><a class="link" href="pricing-calculator.html" style="font-size:12px">Open the unit-economics calculator →</a></div>
+      </div>
+      <div class="digest">
+        <div class="dg-chrome"><b>From:</b> Rally &amp; Roam Launch Agent &lt;agent@coverpanda.co&gt; · <b>To:</b> taylor@rallyroam.com<br/><b>Subject:</b> Your week, run by the Launch Agent — drafting live, sends Fri Jun 12, 4:00 PM</div>
+        <div class="dg-head"><div class="dh-t">Your week, run by the Launch Agent</div><div class="dh-s">Rally &amp; Roam · week of Jun 8 · drafting live as the week unfolds</div></div>
+        <div class="dg-body">
+          <div class="dg-row">${ic('i-sign','ic--s')}<span><b>1 signing:</b> Alex Rivera (Phoenix) executed Wednesday 9:14 AM — ${STATE.feeApproved ? 'fee collected, onboarding live, kickoff Thursday' : 'fee staged in your queue; onboarding fires the moment you approve'}</span></div>
+          <div class="dg-row">${ic('i-clock','ic--s')}<span><b>Sam Okafor</b> exits cooldown Thursday Jun 18 — entity, financing &amp; insurance already done; signing day is a formality</span></div>
+          <div class="dg-row">${ic('i-send','ic--s')}<span><b>Jordan Mills</b> cleared evaluation Monday — FDD awaiting your approval (2 days in queue)</span></div>
+          <div class="dg-row">${ic('i-building','ic--s')}<span><b>Dana Park</b> build-out W16, 2 days ahead; HVAC slip absorbed without moving the Aug 21 open</span></div>
+          <div class="dg-row">${ic('i-box','ic--s')}<span><b>Services attached this week:</b> 1 insurance bind (Alex) · Sam's sprint completed earlier: formation + $480K pre-qual + quote</span></div>
+          <div class="dg-row">${ic('i-bell','ic--s')}<span><b>Next week needs you twice:</b> Jordan's FDD approval · Sam's final signing</span></div>
+        </div>
+        <div class="dg-foot">Sent by your Launch Agent · every action logged &amp; auditable in the console · reply to this email and the agent files it · <span style="text-decoration:underline">notification settings</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ====================== ENGINE ====================== */
+function buildStage() {
+  const root = $id('stageRoot');
+  root.innerHTML = SCREENS.map((s, i) => `<section class="screen ${i===cur?'active':''}" data-idx="${i}">${s.render()}</section>`).join('');
+  const jump = $id('pbJump');
+  jump.innerHTML = SCREENS.map((s, i) => `<option value="${i}" ${i===cur?'selected':''}>${s.name}</option>`).join('');
+  $id('pbStep').innerHTML = `<b>${cur+1}</b>/${SCREENS.length}`;
+  if (cur === 8) setTimeout(playReplay, 350);
+}
+function rerender() {
+  const root = $id('stageRoot');
+  const sec = root.querySelector(`.screen[data-idx="${cur}"]`);
+  if (sec) sec.innerHTML = SCREENS[cur].render();
+  if (cur === 8) setTimeout(playReplay, 200);
+}
+function go(n) {
+  if (n < 0 || n >= SCREENS.length) return;
+  cur = n; closeAll(); hideToast(); buildStage();
+  window.scrollTo(0, 0);
+}
+function next() { go(Math.min(cur + 1, SCREENS.length - 1)); }
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea, select')) return;
+  if (e.key === 'ArrowRight') next();
+  if (e.key === 'ArrowLeft') go(Math.max(cur - 1, 0));
+  if (e.key === 'Escape') closeAll();
+});
+buildStage();
+</script>
+</body>
+</html>
