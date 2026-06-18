@@ -313,7 +313,13 @@ function rInvite(){
         <div class="tick">${ic('i-check','ic--s')} <span>Then warm leads land in your inbox — proposals half-written</span></div>
       </div>
     </div>
-    <div style="margin-top:22px"><button class="btn btn--dark btn--lg" onclick="STATE.accepted=true;go(1)">Accept &amp; start setup ${ic('i-arrow','ic--s')}</button></div>
+    <div class="card" style="max-width:520px;margin:14px auto 0;text-align:left">
+      <div class="seclab">Create your vendor account</div>
+      <div class="field" style="margin-top:10px"><label>Work email</label><input class="input" value="hello@hatchcpa.com" /></div>
+      <div class="field" style="margin-top:10px"><label>Your name</label><input class="input" value="Nadia Fuentes" /></div>
+      <div class="hint" style="margin-top:6px">${ic('i-lock','ic--s')} <span>No password to set — we send a secure magic-link sign-in. CoverPanda never stores a password.</span></div>
+    </div>
+    <div style="margin-top:18px"><button class="btn btn--dark btn--lg" onclick="STATE.accepted=true;toast('Account created · magic-link sent to hello@hatchcpa.com');go(1)">Create account &amp; accept invite ${ic('i-arrow','ic--s')}</button></div>
     <div style="margin-top:10px"><button class="mlink" onclick="toast('Declined — the brand is notified; you can be re-invited anytime')">Not right now</button></div>
   </div>`;
 }
@@ -543,20 +549,45 @@ function goLive(){
 }
 
 /* ============ 9 · LEAD INBOX ============ */
+function liveLeads(){
+  // requests written by a franchisee's onboarding portal (the three-sided seam)
+  const all = window.cpMktList ? cpMktList() : [];
+  return all.filter(r=>r.category==='Accounting & books').reverse();
+}
+function liveLeadCard(r){
+  const init = (r.unit||'').replace('Bright Pickleball ','').slice(0,2).toUpperCase() || 'TU';
+  const engaged = r.status==='engaged';
+  const prods = (r.products||[]).map(p=>`<span class="qchip">${ic('i-check','ic--s')} ${p.name}</span>`).join('');
+  return `<div class="lead new"><div class="av" style="background:var(--green)">${init}</div>
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="lt">${r.unit}</span>
+        <span class="vbadge ${engaged?'green':'amber'}">${engaged?'SIGNED &amp; PAID':'LIVE · from her portal'}</span></div>
+      <div class="ld">${r.franchisee} requested a proposal through <b>${r.brand}</b>'s onboarding portal${r.vendorName?` — she picked <b>${r.vendorName}</b>`:''}. ${r.note?`“${r.note}”`:'Needs books live before her first construction invoice.'}</div>
+      <div class="qual">${prods}<span class="qchip">${ic('i-check','ic--s')} ${r.context||'Brand terms attached'}</span></div>
+      <div style="margin-top:13px"><button class="btn btn--dark" onclick="openLead('${r.id}')">Open &amp; respond ${ic('i-arrow','ic--s')}</button></div>
+    </div></div>`;
+}
 function rInbox(){
+  const live = liveLeads();
+  const liveHtml = live.map(liveLeadCard).join('');
+  const fallback = live.length ? '' : `
+      <div class="lead new"><div class="av" style="background:var(--green)">TU</div>
+        <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="lt">Tucson #1 · Bright Pickleball</span> <span class="vbadge green">NEW</span></div>
+          <div class="ld">Maya Chen requested a <b>monthly bookkeeping</b> proposal as she opens her unit. Needs books live before her first construction invoice.</div>
+          <div class="qual"><span class="qchip">${ic('i-check','ic--s')} QuickBooks connected</span><span class="qchip">${ic('i-check','ic--s')} Brand-preferred match</span><span class="qchip">${ic('i-check','ic--s')} Funded &amp; signed</span><span class="qchip">${ic('i-check','ic--s')} Chart of accounts shared</span></div>
+          <div style="margin-top:13px"><button class="btn btn--dark" onclick="go(10)">Open &amp; respond ${ic('i-arrow','ic--s')}</button></div></div></div>`;
+  const seamNote = live.length ? `<div class="hint" style="margin-top:0;margin-bottom:4px;background:var(--green-soft,#e3f6ea);color:var(--green-deep,#00702e)">${ic('i-link')} <span><b>This lead is live.</b> It's the exact request a franchisee just sent from their onboarding portal — same object, no re-keying.</span></div>` : '';
+  const newCount = live.length + 2;
   return `<div>${dashTabs('inbox')}<div class="wrap">
     <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
       <div><span class="eyebrow"><span class="d"></span> live · your lead inbox</span>
         <h1 class="display" style="font-size:28px;margin-top:9px">Franchisees are coming to you.</h1>
         <div class="sub" style="margin-top:4px">Every lead was sent by a brand and arrives pre-qualified — the unit's data already connected.</div></div>
-      <div style="display:flex;gap:11px"><div class="stat"><div class="sv">3</div><div class="sl">new this week</div></div><div class="stat"><div class="sv">2</div><div class="sl">marketplaces live</div></div></div>
+      <div style="display:flex;gap:11px"><div class="stat"><div class="sv">${newCount}</div><div class="sl">new this week</div></div><div class="stat"><div class="sv">2</div><div class="sl">marketplaces live</div></div></div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:11px;margin-top:20px">
-      <div class="lead new"><div class="av" style="background:var(--green)">TU</div>
-        <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="lt">Tucson #1 · Bright Pickleball</span> <span class="vbadge green">NEW</span></div>
-          <div class="ld">Maya Chen requested a <b>monthly bookkeeping</b> proposal as she opens her unit. Needs books live before her first construction invoice.</div>
-          <div class="qual"><span class="qchip">${ic('i-check','ic--s')} QuickBooks connected</span><span class="qchip">${ic('i-check','ic--s')} Brand-preferred match</span><span class="qchip">${ic('i-check','ic--s')} Funded &amp; signed</span><span class="qchip">${ic('i-check','ic--s')} Chart of accounts shared</span></div>
-          <div style="margin-top:13px"><button class="btn btn--dark" onclick="go(10)">Open &amp; respond ${ic('i-arrow','ic--s')}</button></div></div></div>
+    ${seamNote}
+    <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px">
+      ${liveHtml}${fallback}
       <div class="lead"><div class="av" style="background:var(--blue)">GO</div><div style="flex:1;min-width:0"><div class="lt">Goleta · Rally &amp; Roam</div><div class="ld">Existing unit switching accountants — wants royalty-ready P&amp;L on the brand template.</div><div class="qual"><span class="qchip">${ic('i-check','ic--s')} QuickBooks connected</span><span class="qchip">${ic('i-check','ic--s')} 14 months history</span></div></div><span class="mlink" style="align-self:center">Later</span></div>
       <div class="lead"><div class="av" style="background:var(--amber)">PH</div><div style="flex:1;min-width:0"><div class="lt">Phoenix #1 · Rally &amp; Roam</div><div class="ld">New signing — entity bookkeeping + year-end tax. Brand flagged you preferred.</div><div class="qual"><span class="qchip">${ic('i-check','ic--s')} Brand-preferred match</span><span class="qchip">${ic('i-check','ic--s')} Just signed</span></div></div><span class="mlink" style="align-self:center">Later</span></div>
     </div>
@@ -565,22 +596,34 @@ function rInbox(){
 }
 
 /* ============ 10 · RESPOND ============ */
+function activeReq(){ if(!ACTIVE_REQ||!window.cpMktList) return null; return cpMktList().find(r=>r.id===ACTIVE_REQ)||null; }
 function rRespond(){
-  const items=[['Monthly bookkeeping & reconciliation','$240/mo'],['Royalty-ready P&L (Bright Pickleball template)','included'],['Year-end tax package','$600/yr'],['First month','free']];
+  const req=activeReq();
+  const who = req? req.franchisee : 'Maya Chen';
+  const brand = req? req.brand : 'Bright Pickleball';
+  const unit = req? (req.unit||'').replace('Bright Pickleball ','') : 'Tucson #1';
+  const items = req && req.products && req.products.length
+    ? req.products.map(p=>[p.name, p.amount]).concat([['First month','free']])
+    : [['Monthly bookkeeping & reconciliation','$240/mo'],['Royalty-ready P&L (Bright Pickleball template)','included'],['Year-end tax package','$600/yr'],['First month','free']];
   return `<div>${dashTabs('proposals')}<div class="wrap wrap--narrow">
     <div class="panda"><div class="av"><svg width="20" height="20" viewBox="0 0 26 26"><use href="#i-panda"/></svg></div>
       <div style="min-width:0"><div class="name">Panda · drafted from your template ${ic('i-spark','ic--s')}</div>
-      <div class="bub">I dropped <b>Maya's connected QuickBooks</b> and Bright Pickleball's chart of accounts into <b>your</b> proposal template and packages. Review, adjust, send.</div></div></div>
-    <div style="margin-bottom:11px"><span class="prefill">${ic('i-spark','ic--s')} Your template · pre-filled from the unit's data</span></div>
+      <div class="bub">I dropped <b>${who.split(' ')[0]}'s connected QuickBooks</b> and ${brand}'s chart of accounts into <b>your</b> proposal template and packages${req?` — matched to exactly what she requested`:''}. Review, adjust, send.</div></div></div>
+    <div style="margin-bottom:11px"><span class="prefill">${ic('i-spark','ic--s')} Your template · pre-filled from ${req?'her request':"the unit's data"}</span></div>
     <div class="prop">
-      <div style="padding:16px 18px;color:#fff;background:${STATE.brandColor}"><div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.8">Proposal</div><div style="font-family:var(--display);font-size:18px;margin-top:4px">Monthly bookkeeping — Tucson #1</div><div style="font-size:11px;opacity:.85;margin-top:3px">Prepared for Maya Chen · Bright Pickleball · by Hatch CPA Group</div></div>
+      <div style="padding:16px 18px;color:#fff;background:${STATE.brandColor}"><div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.8">Proposal</div><div style="font-family:var(--display);font-size:18px;margin-top:4px">${req?req.category:'Monthly bookkeeping'} — ${unit}</div><div style="font-size:11px;opacity:.85;margin-top:3px">Prepared for ${who} · ${brand} · by Hatch CPA Group</div></div>
       <div class="ph"><b>Pricing</b> · sized for a single opening unit</div>
       ${items.map(([k,v])=>`<div class="lineitem"><span>${k}</span><b>${v}</b></div>`).join('')}
       <div class="ph" style="border-top:1px solid var(--border);border-bottom:0"><b>Payment</b> · ${STATE.pay.schedule==='recurring'?'recurring auto-charge':'deposit + balance'} · ${STATE.pay.ach?'ACH':''}${STATE.pay.ach&&STATE.pay.card?' / ':''}${STATE.pay.card?'card':''} · e-sign on accept</div>
     </div>
-    <div class="note" style="margin-top:14px">You didn't open a blank quote. Your template, your packages, the brand's terms, and Maya's connected books were already here. <b>Off-platform, this is an hour of back-and-forth before you can even send a number.</b></div>
-    <div class="navbtns"><button class="btn btn--dark btn--lg" onclick="toast('Proposal sent to Maya · she signs &amp; pays in one tap');go(11)">Send proposal ${ic('i-arrow','ic--s')}</button><button class="mlink" onclick="toast('Edit mode — adjust line items, then send')">Adjust line items</button></div>
+    <div class="note" style="margin-top:14px">You didn't open a blank quote. Your template, your packages, the brand's terms, and ${who.split(' ')[0]}'s connected books were already here. <b>Off-platform, this is an hour of back-and-forth before you can even send a number.</b></div>
+    <div class="navbtns"><button class="btn btn--dark btn--lg" onclick="sendProposal()">Send proposal ${ic('i-arrow','ic--s')}</button><button class="mlink" onclick="toast('Edit mode — adjust line items, then send')">Adjust line items</button></div>
   </div></div>`;
+}
+function sendProposal(){
+  const req=activeReq();
+  if(req && window.cpMktUpdate) cpMktUpdate(req.id,{status:'proposal'});
+  toast('Proposal sent · she signs & pays in one tap'); go(11);
 }
 
 /* ============ 11 · PAID + ECONOMICS ============ */
@@ -597,8 +640,13 @@ function rPaid(){
       </div>
     </div>
 
-    <div class="seclab" style="margin:20px 0 9px">Next payout</div>
-    <div class="bankbox connected"><div class="bi">${ic('i-bank','ic--s')}</div><div style="flex:1"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">$240.00 · clearing to ••4821</div><div style="font-size:11.5px;color:var(--muted)">Standard payout · arrives in 2 business days · receipt sent to Maya</div></div><span class="vbadge green">${ic('i-check','ic--s')} Scheduled</span></div>
+    <div class="seclab" style="margin:20px 0 9px">Payouts · to Wells Fargo ••4821</div>
+    <div class="bankbox connected"><div class="bi">${ic('i-bank','ic--s')}</div><div style="flex:1"><div style="font-size:13.5px;font-weight:700;color:var(--ink)">$240.00 · clearing now</div><div style="font-size:11.5px;color:var(--muted)">Tucson #1 · Maya Chen · arrives in 2 business days · receipt sent</div></div><span class="vbadge green">${ic('i-check','ic--s')} Scheduled</span></div>
+    <div style="margin-top:8px;border-radius:13px;box-shadow:0 0 0 1px var(--border) inset;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--border);font-size:12.5px"><div><b style="color:var(--ink)">Goleta · Rally &amp; Roam</b><div style="font-size:11px;color:var(--muted)">Monthly bookkeeping · Jun 1</div></div><div style="text-align:right"><b style="color:var(--ink)">$240.00</b><div style="font-size:11px;color:var(--green-deep,#00702e)">Paid out</div></div></div>
+      <div style="display:flex;justify-content:space-between;padding:11px 15px;font-size:12.5px"><div><b style="color:var(--ink)">Phoenix #1 · Rally &amp; Roam</b><div style="font-size:11px;color:var(--muted)">Entity setup + tax · May 18</div></div><div style="text-align:right"><b style="color:var(--ink)">$1,100.00</b><div style="font-size:11px;color:var(--green-deep,#00702e)">Paid out</div></div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted2);margin-top:8px;display:flex;align-items:center;gap:6px">${ic('i-lock','ic--s')} Payments run on CoverPanda's rails — no Stripe to wire up, no invoices to chase. CoverPanda never holds your banking login.</div>
 
     <div style="margin-top:20px"><span class="seclab">What it costs you to be here</span></div>
     <div class="row2" style="margin-top:11px">
@@ -631,6 +679,8 @@ const SCREENS=[
   {name:'11 · Signed, paid & economics', render:rPaid},
 ];
 let cur=0;
+let ACTIVE_REQ=null; // id of the live marketplace request being responded to
+function openLead(id){ ACTIVE_REQ=id; go(10); }
 // mark a wizard step done when you advance past it
 function markStepFromAdvance(from){ if(from>=1&&from<=7) STATE.done[from]=true; }
 function buildStage(){

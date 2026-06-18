@@ -1049,14 +1049,24 @@ function renderDrawer(){
 
 function requestVendor(){
   const {svc,id}=DRAWER; const v=vendorView(svc,id);
-  STATE.roster[svc]={ id, name:v.name, who:v.person, status:'requested' };
+  const reqId='req_'+svc+'_'+Date.now();
+  STATE.roster[svc]={ id, name:v.name, who:v.person, status:'requested', reqId };
+  // ---- the three-sided seam: this request lands in the vendor's inbox as one object ----
+  if(window.cpMktAdd) cpMktAdd({
+    id:reqId, ts:Date.now(), svc, category:v.cat, vendorId:id, vendorName:v.name, vendorPerson:v.person,
+    franchisee:'Maya Chen', unit:'Bright Pickleball Tucson #1', brand:'Bright Pickleball',
+    products:selectedProducts(v).map(p=>({name:p.name, amount:p.amount})),
+    context:`${CTX[svc].q}: ${CTX[svc].opts[DRAWER.ctx]}`, note:DRAWER.note||'', status:'requested'
+  });
   DRAWER.step='sent'; renderDrawer(); rerender();
   toast(`Request sent to ${v.person}`);
 }
 function engageVendor(){
   const {svc,id}=DRAWER; const v=vendorView(svc,id);
-  STATE.roster[svc]={ id, name:v.name, who:v.person, status:'engaged' };
+  const reqId=(STATE.roster[svc]&&STATE.roster[svc].reqId)||('req_'+svc+'_'+Date.now());
+  STATE.roster[svc]={ id, name:v.name, who:v.person, status:'engaged', reqId };
   STATE.phases.forEach(p=>p.tasks.forEach(t=>{ if(t.svc===svc) t.done=true; }));
+  if(window.cpMktUpdate) cpMktUpdate(reqId,{status:'engaged'});
   DRAWER.step='engaged'; renderDrawer(); rerender();
   toast(`${v.person} is on your team 🎉`);
 }

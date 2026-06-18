@@ -34,6 +34,24 @@
   };
   window.cpGoMap = function () { location.href = MAP; };
 
+  // ---- shared marketplace store: the three-sided seam ----
+  // A franchisee's vendor request written here (franchisee onboarding portal) is read
+  // by the vendor portal's inbox as the same object. Same-origin localStorage.
+  var MKT = 'cp_marketplace';
+  function mktRead() { try { return JSON.parse(localStorage.getItem(MKT)) || []; } catch (e) { return []; } }
+  function mktWrite(a) { try { localStorage.setItem(MKT, JSON.stringify(a)); } catch (e) {} }
+  window.cpMktAdd = function (req) {
+    var a = mktRead();
+    var i = a.findIndex(function (r) { return r.id === req.id; });
+    if (i > -1) a[i] = req; else a.push(req);
+    mktWrite(a); return req.id;
+  };
+  window.cpMktList = function () { return mktRead(); };
+  window.cpMktUpdate = function (id, patch) {
+    var a = mktRead().map(function (r) { return r.id === id ? Object.assign(r, patch) : r; });
+    mktWrite(a);
+  };
+
   // inject the fixed pill once the DOM is ready
   function inject() {
     if (document.getElementById('cpJourneyPill')) return;
