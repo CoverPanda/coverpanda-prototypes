@@ -237,7 +237,7 @@ function renderCats(){
         <div class="ci"><svg class="ic"><use href="#${cat.icon}"/></svg></div>
         <div>
           <div class="ctitle">${cat.name}</div>
-          <div class="csel"><span class="mini" style="background:${sel.logoBg}">${sel.logo}</span> <b>${sel.name}</b></div>
+          <div class="csel">${sel?`<span class="mini" style="background:${sel.logoBg}">${sel.logo}</span> <b>${sel.name}</b>`:`<b style="color:${cat.required?'var(--ember-deep,#c93100)':'var(--muted2)'}">${cat.required?'⚠ No vendor — required to launch':'No vendor selected'}</b>`}</div>
         </div>
         <div class="grow"></div>
         <div class="seg" onclick="event.stopPropagation()">
@@ -249,6 +249,9 @@ function renderCats(){
       <div class="catbody"><div class="catinner">
         ${reqNote}
         ${opts}
+        ${sel
+          ? `<div style="text-align:right;margin:2px 0 6px"><button class="mlink" style="text-decoration:underline;text-underline-offset:2px" onclick="clearVendor('${cat.id}')">Remove ${sel.name} from this category</button></div>`
+          : `<div class="gravnote" style="background:var(--ember-soft,#ffece4);color:var(--ember-deep,#c93100)"><svg class="ic ic--s"><use href="#i-x"/></svg> No vendor here yet${cat.required?' — required categories must be filled before you can publish.':' — franchisees won\'t see an option for this category.'}</div>`}
         <div class="invite" onclick="openInvite('${cat.id}')"><svg class="ic"><use href="#i-plus"/></svg> Invite your own ${cat.name.toLowerCase()} vendor</div>
         <div class="gravnote"><svg class="ic ic--s"><use href="#i-check"/></svg> Whoever you pick transacts on CoverPanda's agreement + payment rails — you keep unified compliance and one reporting view across every unit.</div>
       </div></div>
@@ -277,6 +280,13 @@ function renderMirror(){
     const [c1,c2] = COLORS[cat.color];
     const o = cat.options.find(x=>x.id===cat.selected);
     const badge = cat.required ? `<span class="mbadge req">Required</span>` : `<span class="mbadge pref">Preferred</span>`;
+    if(!o){
+      return `<div class="mnode" style="opacity:.7">
+        <div class="mlogo" style="background:var(--stone,#efece6);color:var(--muted2)"><svg class="ic ic--s"><use href="#i-x"/></svg></div>
+        <div class="mgrow"><div class="mn">${cat.name}</div><div class="mc" style="color:${cat.required?'var(--ember-deep,#c93100)':'var(--muted2)'}">${cat.required?'No vendor — can\'t launch':'No vendor set'}</div></div>
+        ${badge}
+      </div>`;
+    }
     return `<div class="mnode">
       <div class="mlogo" style="background:${o.logoBg}">${o.logo}</div>
       <div class="mgrow"><div class="mn">${cat.name}</div><div class="mc">${o.name} · tap to meet</div></div>
@@ -285,7 +295,8 @@ function renderMirror(){
   }).join('');
   const reqCount = CATS.filter(c=>c.required).length;
   const cpCount = CATS.filter(c=>c.options.find(o=>o.id===c.selected)?.cp).length;
-  document.getElementById('mstat').innerHTML = `<b>${CATS.length}</b> categories · <b>${reqCount}</b> required · <b>${cpCount}</b> on CoverPanda services`;
+  const reqGaps = CATS.filter(c=>c.required && !c.options.find(o=>o.id===c.selected)).length;
+  document.getElementById('mstat').innerHTML = `<b>${CATS.length}</b> categories · <b>${reqCount}</b> required · <b>${cpCount}</b> on CoverPanda services${reqGaps?` · <b style="color:var(--ember-deep,#c93100)">${reqGaps} required gap${reqGaps>1?'s':''}</b>`:''}`;
 }
 
 /* ---------- interactions ---------- */
@@ -348,8 +359,24 @@ function sendInvite(){
   toast(`Invite sent — ${name} added to ${cat.name}.`);
 }
 
+function clearVendor(catId){
+  const cat = CATS.find(c=>c.id===catId); const o = cat.options.find(x=>x.id===cat.selected);
+  cat.selected = null;
+  if(PUBLISHED) markDraft();
+  renderCats();
+  pandaSay(`Removed ${o?('<b>'+o.name+'</b>'):'the vendor'} from <b>${cat.name}</b>.${cat.required?` This category is <b>Required</b> — pick a vendor (or invite your own) before publishing, or your franchisees can\'t launch.`:` Franchisees won\'t see an option here until you add one.`}`);
+  toast(`${cat.name} cleared.`);
+}
+
 /* ---------- publish ---------- */
 function publish(){
+  const gaps = CATS.filter(c=>c.required && !c.options.find(o=>o.id===c.selected));
+  if(gaps.length){
+    OPEN = gaps[0].id; renderCats();
+    pandaSay(`Hold on — <b>${gaps.map(g=>g.name).join(', ')}</b> ${gaps.length>1?'are':'is'} marked <b>Required</b> but ${gaps.length>1?'have':'has'} no vendor. Franchisees can\'t launch without ${gaps.length>1?'them':'it'}. Add a vendor and publish again.`);
+    toast(`Can\'t publish — ${gaps.length} required categor${gaps.length>1?'ies':'y'} empty.`);
+    return;
+  }
   PUBLISHED = true;
   const b = document.getElementById('liveBadge');
   b.classList.add('on'); b.innerHTML = `<span class="b"></span>Live`;

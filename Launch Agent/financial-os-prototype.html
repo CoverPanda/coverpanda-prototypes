@@ -472,7 +472,7 @@ const STATE = {
     {n:'Escondido', i:'ES', r:58100, s:'synced'}, {n:'Oceanside', i:'OC', r:49700, s:'synced'},
     {n:'La Mesa', i:'LM', r:54800, s:'synced'}, {n:'Encinitas', i:'EN', r:60200, s:'synced'},
     {n:'El Cajon', i:'EC', r:55300, s:'synced'}, {n:'Mira Mesa', i:'MM', r:55605, s:'synced'},
-    {n:'Poway', i:'PW', r:46300, s:'idle'}, {n:'Santee', i:'ST', r:44800, s:'idle'},
+    {n:'Poway', i:'PW', r:46300, s:'error'}, {n:'Santee', i:'ST', r:44800, s:'idle'},
     {n:'National City', i:'NC', r:48900, s:'idle'}, {n:'Mission Valley', i:'MV', r:52100, s:'idle'},
     {n:'Del Mar', i:'DM', r:49600, s:'idle'}, {n:'Coronado', i:'CO', r:47300, s:'idle'},
     {n:'Imperial Beach', i:'IB', r:43200, s:'idle'}, {n:'Tucson #1', i:'TU', r:45900, s:'idle'},
@@ -585,41 +585,44 @@ function renderNetwork() {
   const onlineCount = !live ? 0 : U.filter(u=>u.s==='synced').length + (STATE.idleNudged ? U.filter(u=>u.s==='idle').length : 0);
   const pct = Math.round(onlineCount / U.length * 100);
   const idleLeft = U.filter(u=>u.s==='idle').length;
+  const errLeft = (live ? U.filter(u=>u.s==='error').length : 0);
 
   const nodes = U.map(u=>{
     // visible status: arriving always shows arriving; synced/idle light only after connect (+nudge)
     let st = 'pending';
     if (u.s==='arriving') st = 'arriving';
     else if (live && u.s==='synced') st = 'on';
+    else if (live && u.s==='error') st = 'error';
     else if (live && u.s==='idle' && STATE.idleNudged) st = 'on';
     else if (live && u.s==='idle') st = 'idle';
-    const c = st==='on' ? 'var(--green)' : st==='arriving' ? 'var(--amber)' : 'var(--border-2)';
-    const cs = st==='on' ? 'var(--green-soft)' : st==='arriving' ? 'var(--amber-soft)' : 'var(--panel)';
-    const col = st==='on' ? 'var(--green-deep)' : st==='arriving' ? 'var(--amber)' : 'var(--muted-2)';
-    const ring = st==='on' ? `box-shadow:0 0 0 1.5px ${c} inset` : st==='arriving' ? `box-shadow:0 0 0 1.5px ${c} inset` : 'box-shadow:var(--inset-2); border:1.2px dashed var(--border-2)';
-    const dot = st==='on' ? `<span style="width:6px;height:6px;border-radius:50%;background:var(--green)"></span>`
-      : st==='arriving' ? `<span style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></span>`
-      : `<span style="width:6px;height:6px;border-radius:50%;background:var(--border-2)"></span>`;
-    const title = st==='arriving' ? 'Joining via Launch Agent' : st==='on' ? 'Syncing · '+money(u.r) : st==='idle' ? 'Awaiting connect' : 'Ready to sync';
+    const c = st==='on'?'var(--green)':st==='arriving'?'var(--amber)':st==='error'?'#d4351c':'var(--border-2)';
+    const cs = st==='on'?'var(--green-soft)':st==='arriving'?'var(--amber-soft)':st==='error'?'#fbe9e6':'var(--panel)';
+    const col = st==='on'?'var(--green-deep)':st==='arriving'?'var(--amber)':st==='error'?'#b82d16':'var(--muted-2)';
+    const ring = (st==='on'||st==='arriving'||st==='error') ? `box-shadow:0 0 0 1.5px ${c} inset` : 'box-shadow:var(--inset-2); border:1.2px dashed var(--border-2)';
+    const dot = `<span style="width:6px;height:6px;border-radius:50%;background:${st==='on'?'var(--green)':st==='arriving'?'var(--amber)':st==='error'?'#d4351c':'var(--border-2)'}"></span>`;
+    const title = st==='arriving' ? 'Joining via Launch Agent' : st==='on' ? 'Syncing · '+money(u.r) : st==='error' ? 'Sync failed — reconnect' : st==='idle' ? 'Awaiting connect' : 'Ready to sync';
     return `<div title="${u.n} — ${title}" style="background:var(--card);border-radius:11px;padding:9px 10px;${ring};min-width:0">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
         <span style="width:24px;height:24px;border-radius:7px;background:${cs};color:${col};display:grid;place-items:center;font-size:9.5px;font-weight:700;font-family:var(--display)">${u.i}</span>
         ${dot}
       </div>
       <div style="font-size:11px;font-weight:600;color:var(--ink);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.n}</div>
-      <div style="font-size:9.5px;color:${st==='on'?'var(--green-deep)':col};margin-top:1px;font-weight:${st==='on'||st==='arriving'?'600':'400'}">${st==='on'?money(u.r):st==='arriving'?'Aug 21 →':st==='idle'?'idle':'ready'}</div>
+      <div style="font-size:9.5px;color:${st==='on'?'var(--green-deep)':col};margin-top:1px;font-weight:${st==='on'||st==='arriving'||st==='error'?'600':'400'}">${st==='on'?money(u.r):st==='arriving'?'Aug 21 →':st==='error'?'reconnect':st==='idle'?'idle':'ready'}</div>
     </div>`;
   }).join('');
 
   const headline = !live
     ? `<div style="font-family:var(--display);font-size:25px;color:var(--muted-2)">Connect to bring your network online</div><div style="font-size:12px;color:var(--muted);margin-top:2px">21 units waiting · authorize QuickBooks below to start the roll-up</div>`
     : `<div style="font-family:var(--display);font-size:28px;color:var(--ink);line-height:1">${money(sysRev)}<span style="font-size:13px;color:var(--muted);font-weight:400;font-family:var(--font)"> system revenue · monthly</span></div>
-       <div style="font-size:12px;color:var(--muted);margin-top:3px"><b style="color:var(--green-deep)">${onlineCount} of ${U.length}</b> units online${idleLeft&&!STATE.idleNudged?` · ${idleLeft} idle, books not yet connected`:''}${STATE.idleNudged?' · 1 arriving from your Launch Agent':''}</div>`;
+       <div style="font-size:12px;color:var(--muted);margin-top:3px"><b style="color:var(--green-deep)">${onlineCount} of ${U.length}</b> units online${idleLeft&&!STATE.idleNudged?` · ${idleLeft} idle, books not yet connected`:''}${errLeft?` · <b style="color:#b82d16">${errLeft} needs reconnect</b>`:''}${STATE.idleNudged?' · 1 arriving from your Launch Agent':''}</div>`;
 
+  const errUnit = U.find(u=>u.s==='error');
   const action = !live ? ''
-    : (!STATE.idleNudged && idleLeft
-      ? `<button class="btn btn--dark btn--sm" onclick="nudgeIdle()">${ic('i-bank','ic--s')} Nudge ${idleLeft} idle units to connect</button>`
-      : `<span style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--amber);font-weight:600">${ic('i-clock','ic--s')} SLC #1 arrives automatically when its doors open</span>`);
+    : (errUnit
+      ? `<button class="btn btn--sm" style="background:#d4351c;color:#fff" onclick="reconnectUnit()">${ic('i-link','ic--s')} Reconnect ${errUnit.n}</button>`
+      : (!STATE.idleNudged && idleLeft
+        ? `<button class="btn btn--dark btn--sm" onclick="nudgeIdle()">${ic('i-bank','ic--s')} Nudge ${idleLeft} idle units to connect</button>`
+        : `<span style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--amber);font-weight:600">${ic('i-clock','ic--s')} SLC #1 arrives automatically when its doors open</span>`));
 
   const bar = live ? `<div style="height:6px;border-radius:99px;background:var(--panel);overflow:hidden;margin:13px 0 3px"><div style="height:100%;width:${pct}%;background:var(--green);border-radius:99px;transition:width .6s cubic-bezier(.22,1,.36,1)"></div></div>` : '';
 
@@ -634,6 +637,7 @@ function renderNetwork() {
   </div>`;
 }
 function nudgeIdle(){ STATE.idleNudged = true; rerender(); toast('Connect nudges sent · idle units coming online into your roll-up'); }
+function reconnectUnit(){ const u=STATE.netUnits.find(x=>x.s==='error'); if(u){ u.s='synced'; STATE.unitsSynced++; } rerender(); toast('QuickBooks re-authorized · '+(u?u.n:'unit')+' is syncing again'); }
 function qbConnectBody() {
   if (STATE.connected) return `<div style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--green-deep)">${ic('i-check','ic--s')} ${STATE.unitsSynced + (STATE.idleNudged?STATE.netUnits.filter(u=>u.s==='idle').length:0)} of ${STATE.unitsTotal} locations syncing automatically</div>
     <div class="mlink" style="margin-top:8px" onclick="reviewCOA()">Review the chart-of-accounts mapping →</div>`;

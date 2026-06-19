@@ -999,8 +999,9 @@
             <div class="field"><label>First name</label><input class="input" placeholder="First name" value="Jordan" /></div>
             <div class="field"><label>Last name</label><input class="input" placeholder="Last name" value="Reyes" /></div>
           </div>
-          <div class="field"><label>Work email</label><input class="input" placeholder="you@yourbrand.com" value="jordan@sweetlanecookies.com" /></div>
-          <div class="field"><label>Password</label><input class="input" type="password" placeholder="Create a password" value="coverpanda123" /></div>
+          <div class="field"><label>Work email</label><input class="input" id="acctEmail" placeholder="you@yourbrand.com" value="jordan@sweetlanecookies.com" /></div>
+          <div class="field"><label>Password</label><input class="input" id="acctPass" type="password" placeholder="Create a password" value="coverpanda123" /></div>
+          <div id="acctErr" style="display:none; font-size:12.5px; color:#c93100; background:#ffece4; border-radius:9px; padding:9px 11px; margin-bottom:12px"></div>
           <button class="btn btn--light btn--block btn--lg" onclick="createAccount()">Create my workspace <span class="arrow">→</span></button>
           <div class="foot-note">Already have an account? <span class="link" onclick="createAccount()">Sign in</span></div>
         </div>
@@ -2721,7 +2722,20 @@
   }
 
   // ----- account-first: create the free-trial workspace, then personalize -----
-  function createAccount(){ state.account = true; go(4); }
+  function createAccount(){
+    var emailEl = document.getElementById('acctEmail'), passEl = document.getElementById('acctPass'), err = document.getElementById('acctErr');
+    if (emailEl && passEl && err) {
+      var email = (emailEl.value || '').trim(), pass = (passEl.value || '');
+      var emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+      var msgs = [];
+      emailEl.style.boxShadow = ''; passEl.style.boxShadow = '';
+      if (!emailOk) { msgs.push('Enter a valid work email'); emailEl.style.boxShadow = '0 0 0 1.5px #d4351c inset'; }
+      if (pass.length < 8) { msgs.push('Password needs at least 8 characters'); passEl.style.boxShadow = '0 0 0 1.5px #d4351c inset'; }
+      if (msgs.length) { err.innerHTML = '⚠ ' + msgs.join(' · '); err.style.display = 'block'; return; }
+      err.style.display = 'none';
+    }
+    state.account = true; go(4);
+  }
   window.createAccount = createAccount;
   // ----- enter workspace + welcome modal -----
   // Round 14 · #4: the welcome modal is retired from the flow — the payoff

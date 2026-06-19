@@ -576,6 +576,18 @@ const STATE = {
         { out:true, tx:'Alex — everything\'s verified for this morning: entity ✓, funds ✓, insurance ready to bind. Your agreement goes live for signature at 9 AM.', tm:'Today · 7:30 AM', agent:true },
         { out:false, tx:'Signed! That was the smoothest contract process I\'ve ever been through.', tm:'Today · 9:16 AM' },
       ]},
+    priya: { ini:'PN', name:'Priya Nair', loc:'Reno, NV', stage:'Evaluation', stageNote:'Stalled 9 days — needs you', stClass:'you',
+      head:'Closing · gone quiet since Discovery Day', sub:'Qualified May 2 · Discovery Day May 20 · no reply to 3 agent nudges',
+      tl:[
+        { cls:'done', t:'Qualified & welcomed', tags:['agent'], d:'Portal opened May 2; strong early engagement.', tm:'May 2' },
+        { cls:'done', t:'Discovery Day completed', tags:['agent'], d:'Attended May 20; positive internal debrief.', tm:'May 20' },
+        { cls:'agent', t:'Went quiet — agent re-engaged 3×', tags:['agent'], d:'No reply since May 22. Agent sent three spaced, non-pushy check-ins and a short brand-story re-send — then stepped back so it wouldn\'t become noise.', tm:'May 22 → today' },
+        { cls:'now', t:'Needs a human — re-engage or release', tags:['you'], d:'The agent has done what it can without nagging. Your call: a personal note from you, or release the territory back to the pipeline.', tm:'In your queue' },
+      ],
+      msgs:[
+        { out:true, tx:'Hi Priya — just checking in after Discovery Day. No rush at all; when you\'re ready to talk next steps I\'m here.', tm:'May 26 · 9:00 AM', agent:true },
+        { out:true, tx:'Following up once more, then I\'ll step back so this isn\'t noise. Reply any time and I\'ll pick right back up.', tm:'Jun 3 · 10:00 AM', agent:true },
+      ]},
   },
   approvals: [
     { id:'a1', icn:'i-send', icbg:'var(--amber-soft)', iccol:'var(--amber)', t:'Send FDD to Jordan Mills', who:'jordan', whoTx:'Boise, ID · evaluation passed Monday', gate:'Binding gate',
@@ -587,6 +599,9 @@ const STATE = {
     { id:'a3', icn:'i-flag', icbg:'var(--ember-soft)', iccol:'var(--ember-deep)', t:'Territory question needs a human', who:'sam', whoTx:'Tucson, AZ · cooldown day 6 · cadence paused', gate:'Judgment call',
       body:'Sam asked whether the protected territory can extend to Oro Valley. That\'s a <b>deal-term decision</b> — outside my lane. I drafted a reply from FDD Item 12 and held all other comms until you weigh in.',
       approveLabel:'Open draft reply', approveMsg:'', review:'draft' },
+    { id:'a4', icn:'i-clock', icbg:'var(--ember-soft)', iccol:'var(--ember-deep)', t:'Priya Nair stalled — re-engage or release', who:'priya', whoTx:'Reno, NV · quiet 9 days · 3 agent nudges unanswered', gate:'Judgment call',
+      body:'Priya went quiet after a strong Discovery Day. The agent re-engaged three times without becoming a nuisance — still no reply. <b>This needs a human:</b> a personal note from you, or release her territory back to the pipeline.',
+      approveLabel:'Re-engage personally', approveMsg:'Personal note sent · agent watching for a reply', review:'release' },
   ],
   feed: [
     { icn:'i-cal', tx:'Booked <b>cooldown check-in</b> with Sam for Friday — sprint recap + signing-day logistics', tm:'24 min ago' },
@@ -1071,22 +1086,22 @@ function rConsole() {
   const feeMet = STATE.feeApproved ? '$45,000' : '$0';
   return `<div class="app">${sideNav('agent')}<main class="app__main">
     <div class="main-head rv">
-      <div><h1>Launch Agent</h1><div class="sub">Working 3 candidates + 1 franchisee · everything below happened without you</div></div>
+      <div><h1>Launch Agent</h1><div class="sub">Working 4 candidates + 1 franchisee · everything below happened without you</div></div>
       <span class="agent-status"><span class="pulse"></span> Active · last action 24 min ago</span>
     </div>
     <div class="mrow rv">
       <div class="met"><div class="m-l">Projected qualified → signed</div><div class="m-v">39 <small>days</small></div><div class="m-d">${ic('i-check','ic--s')} your last manual deal: 110</div>${spark([110,96,72,54,39],'var(--green)')}</div>
-      <div class="met"><div class="m-l">Deals silent &gt; 5 days</div><div class="m-v">0</div><div class="m-d neutral">longest current gap: 31 hours</div>${spark([4,3,2,1,0],'var(--violet)')}</div>
+      <div class="met"><div class="m-l">Deals silent &gt; 5 days</div><div class="m-v">1</div><div class="m-d neutral">Priya Nair · agent re-engaged 3×, flagged for you</div>${spark([0,0,1,1,1],'var(--amber)')}</div>
       <div class="met"><div class="m-l">Nudges this week</div><div class="m-v">11</div><div class="m-d">${ic('i-check','ic--s')} 9 got responses</div>${spark([3,6,8,9,11],'var(--blue)')}</div>
       <div class="met"><div class="m-l">Fees collected · June</div><div class="m-v" id="feeMetric">${feeMet}</div><div class="m-d ${STATE.feeApproved?'':'neutral'}" id="feeMetricSub">${STATE.feeApproved ? ic('i-check','ic--s')+' Alex Rivera · today' : 'Alex Rivera staged — in your queue'}</div></div>
     </div>
     <div class="grid2">
       <div>
         <div class="rv" style="margin-bottom:10px"><span class="seclab">Needs you — ${unresolved.length} item${unresolved.length===1?'':'s'}</span></div>
-        <div class="rv">${STATE.approvals.map(apprCard).join('')}</div>
+        <div class="rv">${unresolved.length===0 ? `<div class="appr"><div class="a-head"><div class="a-ic" style="background:var(--green-soft);color:var(--green-deep)">${ic('i-check')}</div><div style="min-width:0"><div class="a-t">You're all caught up</div><div class="a-who" style="color:var(--muted)">The agent is running every deal end-to-end. Nothing needs you right now.</div></div></div></div>` : ''}${STATE.approvals.map(apprCard).join('')}</div>
         <div class="rv" style="margin:18px 0 10px"><span class="seclab">Pipeline — agent working all four</span></div>
         <div class="pstrip rv">
-          ${pcol('Evaluation', [pcardC('jordan')])}
+          ${pcol('Evaluation', [pcardC('jordan'), pcardC('priya')])}
           ${pcol('Cooldown', [pcardC('sam')])}
           ${pcol('Signing', [pcardC('alex')])}
           ${pcol('Onboarding', [`<div class="pcard" onclick="go(10)"><div class="pc-top">${av('DP','24')}<div><div class="pc-n">Dana Park</div><div class="pc-s">SLC #1 · week 16 of 26</div></div></div><div class="pc-agent ok"><span class="pd"></span> On schedule · build-out</div></div>`])}
@@ -1149,7 +1164,18 @@ function approveItem(id) {
   } else if (id === 'a1') {
     toast('FDD sent to Jordan · 14-day clock started', () => { delete STATE.resolved[id]; rerender(); });
     STATE.feed.unshift({ icn:'i-send', tx:'<b>FDD packet sent</b> to Jordan Mills · cooldown sprint scheduled', tm:'just now' });
+  } else if (id === 'a4') {
+    STATE.candidates.priya.stageNote = 'Personal note sent — agent watching'; STATE.candidates.priya.stClass = 'wait';
+    toast('Personal note sent to Priya · agent resumes if she replies', () => { delete STATE.resolved[id]; STATE.candidates.priya.stageNote='Stalled 9 days — needs you'; STATE.candidates.priya.stClass='you'; rerender(); });
+    STATE.feed.unshift({ icn:'i-msg', tx:'Your personal note sent to <b>Priya Nair</b> · agent watching for a reply', tm:'just now' });
   }
+}
+function releaseCand() {
+  STATE.resolved['a4'] = 'Released · Reno territory back in the pipeline';
+  STATE.candidates.priya.stageNote = 'Released — territory reopened'; STATE.candidates.priya.stClass = 'neutral';
+  STATE.feed.unshift({ icn:'i-flag', tx:'<b>Priya Nair</b> released after stall · Reno territory returned to the pipeline', tm:'just now' });
+  closeAll(); rerender();
+  toast('Priya released · territory back in the pipeline', () => { delete STATE.resolved['a4']; STATE.candidates.priya.stageNote='Stalled 9 days — needs you'; STATE.candidates.priya.stClass='you'; rerender(); });
 }
 function animateFee() {
   const el = $id('feeMetric'); if (!el) return;
@@ -1178,6 +1204,13 @@ function openReview(kind) {
       <div class="doc-sig"><div class="sigbox" style="background:var(--green-soft); color:var(--green-deep)">✓ A. Rivera · 9:14 AM</div><div class="sigbox" style="background:var(--green-soft); color:var(--green-deep)">✓ T. Byington · 9:14 AM</div></div></div>
     </div>
     <div class="m-foot"><button class="btn btn--green" onclick="approveItem('a2')">Approve &amp; collect ${fee$()}</button><button class="mlink" onclick="closeAll()">Close</button></div>`);
+  } else if (kind === 'release') {
+    openModal(`<div class="m-head"><div><div class="mt">Release Priya Nair?</div><div class="ms">Reno, NV · quiet 9 days · 3 agent nudges unanswered</div></div><div class="x" onclick="closeAll()">${ic('i-x')}</div></div>
+    <div class="m-body">
+      <div class="hint" style="margin:0 0 12px">${ic('i-flag')} <span>Releasing closes Priya's file and <b>returns the Reno territory to your pipeline</b> so a new candidate can claim it. The agent stops all outreach. You can always re-invite her later.</span></div>
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.6">Not ready to give up? Send a personal note instead — sometimes one human touch after the agent's nudges is all it takes.</div>
+    </div>
+    <div class="m-foot"><button class="btn btn--dark" onclick="releaseCand()">Release &amp; reopen territory</button><button class="mlink" onclick="closeAll()">Keep trying</button></div>`);
   } else {
     openDraftReply();
   }
@@ -1247,7 +1280,7 @@ function rCandidate() {
 function rClosePortal() {
   const c = STATE.candidates[currentCand];
   const steps = STATE.closingSteps;                       // 7 steps: welcome..handoff
-  const activeIdx = ({ jordan: 2, sam: 3, alex: 5 })[currentCand];
+  const activeIdx = ({ jordan: 2, sam: 3, alex: 5, priya: 3 })[currentCand];
   const sel = closeSel === null ? activeIdx : closeSel;
   const ss = steps[sel];
   const COPY = {
