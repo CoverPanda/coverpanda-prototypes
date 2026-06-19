@@ -1,12 +1,12 @@
 # PRD — CoverPanda Path B: The Financial OS
 
-> **▶ Live prototype:** [Financial OS](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/financial-os-prototype.html) (network connectivity canvas → consolidated P&L → agentic CFO report) · [adoption journey map](https://taylor0832.github.io/coverpanda-prototypes/journey-map.html) — clickable; sample data + proposed pricing.
+> **▶ Live prototype:** [Financial OS](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/financial-os-prototype.html) (network connectivity canvas → consolidated P&L → agentic CFO report) · [adoption journey map](https://coverpanda.github.io/coverpanda-prototypes/journey-map.html) — clickable; sample data + proposed pricing.
 
 **Audience:** Engineering
 **Status:** Draft for build scoping · backbone largely LIVE in production
 **Owner:** Taylor Byington
 **Last updated:** 2026-06-16
-**Prototype:** https://taylor0832.github.io/coverpanda-launch-agent-prototype/financial-os.html
+**Prototype:** https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/financial-os-prototype.html
 
 ---
 
@@ -180,7 +180,7 @@ The substrate exists in production; documented here for the packaging layer to b
 
 ## Appendix
 
-**Prototype:** https://taylor0832.github.io/coverpanda-launch-agent-prototype/financial-os.html
+**Prototype:** https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/financial-os-prototype.html
 (local: `Launch Agent/financial-os-prototype.html` — 6 screens)
 
 **Source docs:**

@@ -1,6 +1,6 @@
 # PRD — CoverPanda Vendor Marketplace & Portal (the three-sided network)
 
-> **▶ Live prototypes:** [Franchisor gallery (curate)](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/vendor-stack-builder-prototype.html) · [Vendor portal (setup → leads → paid)](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/vendor-portal-prototype.html) · [Franchisee onboarding portal (meet & request)](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/onboarding-portal-prototype.html) — clickable; sample data + proposed pricing.
+> **▶ Live prototypes:** [Franchisor gallery (curate)](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/vendor-stack-builder-prototype.html) · [Vendor portal (setup → leads → paid)](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/vendor-portal-prototype.html) · [Franchisee onboarding portal (meet & request)](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/onboarding-portal-prototype.html) — clickable; sample data + proposed pricing.
 
 **Audience:** Engineering (product + platform)
 **Owner:** Taylor

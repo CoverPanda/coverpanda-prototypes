@@ -1,6 +1,6 @@
 # PRD — CoverPanda Path A: The Launch Agent
 
-> **▶ Live prototype:** [Launch Agent console](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/launch-agent-prototype.html) (closing + 10-phase onboarding; brand's view of the candidate close on screen 12) · [candidate portal (first-person close)](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/candidate-portal-prototype.html) · [franchisee onboarding portal](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/onboarding-portal-prototype.html) · [adoption journey map](https://taylor0832.github.io/coverpanda-prototypes/journey-map.html) — clickable; sample data + proposed pricing.
+> **▶ Live prototype:** [Launch Agent console](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/launch-agent-prototype.html) (closing + 10-phase onboarding; brand's view of the candidate close on screen 12) · [candidate portal (first-person close)](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/candidate-portal-prototype.html) · [franchisee onboarding portal](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/onboarding-portal-prototype.html) · [adoption journey map](https://coverpanda.github.io/coverpanda-prototypes/journey-map.html) — clickable; sample data + proposed pricing.
 
 **Audience:** Engineering (product + platform)
 **Owner:** Taylor
@@ -16,7 +16,7 @@
 
 - It is a paid **per-signed-franchisee add-on**, sold as an upgrade off the free/Lite workspace.
 - It is **not greenfield AI**. It reuses production primitives (native e-sign, payments/royalty rails, the Reports/Announcements generation engine = Sources+Skills+Brand, existing closing/onboarding portals). The net-new IP is the **orchestration**: a per-candidate state machine, gate enforcement at the action layer, and the approve-by-exception console.
-- **Prototype (12 screens, 0–11):** https://taylor0832.github.io/coverpanda-launch-agent-prototype/
+- **Prototype (12 screens, 0–11):** https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/launch-agent-prototype.html
 
 ---
 
@@ -282,7 +282,7 @@ Mechanics:
 5. **AR / multi-unit per-unit fee** — whether/how to charge per opened unit beyond the first.
 
 ### Appendix — sources
-- **Prototype:** https://taylor0832.github.io/coverpanda-launch-agent-prototype/ (local: `launch-agent-prototype.html`, 12 screens 0–11)
+- **Prototype:** https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/launch-agent-prototype.html (local: `launch-agent-prototype.html`, 12 screens 0–11)
 - `LAUNCH-AGENT-SPEC.md` — autonomy model (§5), services bench (§6), pricing (§7), instrumentation (§8), engineering notes (§9), event map
 - `FUNCTIONAL-PROTOTYPE-PLAN.md` — stress-test findings, v3 backlog (§2), build phases (§3)
 - `PRICING-STRATEGY.md` — pricing rationale; the $750 placeholder and its anchors

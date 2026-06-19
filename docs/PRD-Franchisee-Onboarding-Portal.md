@@ -1,6 +1,6 @@
 # PRD — CoverPanda Franchisee Onboarding Portal
 
-> **▶ Live prototypes:** [Franchisee onboarding portal](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/onboarding-portal-prototype.html) · [Candidate portal (hands off into this)](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/candidate-portal-prototype.html) · [Vendor portal (the other side of the seam)](https://taylor0832.github.io/coverpanda-prototypes/Launch%20Agent/vendor-portal-prototype.html) — clickable; sample data + proposed pricing.
+> **▶ Live prototypes:** [Franchisee onboarding portal](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/onboarding-portal-prototype.html) · [Candidate portal (hands off into this)](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/candidate-portal-prototype.html) · [Vendor portal (the other side of the seam)](https://coverpanda.github.io/coverpanda-prototypes/Launch%20Agent/vendor-portal-prototype.html) — clickable; sample data + proposed pricing.
 
 **Audience:** Engineering (product + platform)
 **Owner:** Taylor

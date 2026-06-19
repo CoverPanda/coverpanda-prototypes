@@ -1,6 +1,6 @@
 # PRD — CoverPanda Lite / Starter ($99) PLG Self-Serve Signup
 
-> **▶ Live prototype:** [Lite / Starter signup](https://taylor0832.github.io/coverpanda-prototypes/CoverPanda%20Sign-Up/revamped-signup-prototype.html) · [full adoption journey map](https://taylor0832.github.io/coverpanda-prototypes/journey-map.html) — clickable; sample data + proposed pricing.
+> **▶ Live prototype:** [Lite / Starter signup](https://coverpanda.github.io/coverpanda-prototypes/CoverPanda%20Sign-Up/revamped-signup-prototype.html) · [full adoption journey map](https://coverpanda.github.io/coverpanda-prototypes/journey-map.html) — clickable; sample data + proposed pricing.
 
 **Audience:** Engineering + Product
 **Status:** Draft for build planning. Macro flow settled; pricing proposed/under team review; activation metric proposed.
@@ -13,7 +13,7 @@
 
 CoverPanda's Lite/Starter tier is a **brand-led, self-serve PLG signup** that lets an emerging franchisor go from landing page to a pre-built franchise workspace and a scheduled first royalty invoice without a sales call or a card at the door. The core pattern is **"Panda proposes · you approve"**: account → brand (with FDD/URL prefill as an accelerator) → goal picker → Panda builds the workspace → a "Get started" checklist where each setup runs as **plan mode** (a short question sequence → a plan summary → approve & run with receipts).
 
-- **Interactive reference (front-end spec):** https://taylor0832.github.io/coverpanda-signup-prototype/
+- **Interactive reference (front-end spec):** https://coverpanda.github.io/coverpanda-prototypes/CoverPanda%20Sign-Up/revamped-signup-prototype.html
 - **Local prototype:** `revamped-signup-prototype.html` (single self-contained HTML file, no build step)
 - **Activation metric (proposed):** `first_invoice_scheduled`
 - **Status:** Several primitives are already live in production (native e-sign, royalty payments via Mindbody/Thread Bank, Reports + Announcements, franchisor onboarding + Starter-trial checkout). The net-new work is the redesigned signup journey, FDD ingestion, plan-mode UX, billing metering, and instrumentation. See §9.
@@ -284,7 +284,7 @@ These are the GAP-REGISTER open items the prototype intentionally does not finis
 
 ## 12. Appendix — source docs
 
-- **Prototype (front-end spec):** https://taylor0832.github.io/coverpanda-signup-prototype/ · local: `CoverPanda Sign-Up/revamped-signup-prototype.html` (single self-contained HTML, no build step)
+- **Prototype (front-end spec):** https://coverpanda.github.io/coverpanda-prototypes/CoverPanda%20Sign-Up/revamped-signup-prototype.html · local: `CoverPanda Sign-Up/revamped-signup-prototype.html` (single self-contained HTML, no build step)
 - `CoverPanda Sign-Up/REVAMP-SPEC.md` — full round history; §26 (R19) and §27 (R20) are most current; §20.7 carries the event map; R20 re-tiered Lite
 - `CoverPanda Sign-Up/PLG-SIGNUP-TEARDOWN.md` — current-production teardown + §0 "Open questions for the product team"
 - `CoverPanda Sign-Up/DEMO-SCRIPT.md` — golden-path walkthrough

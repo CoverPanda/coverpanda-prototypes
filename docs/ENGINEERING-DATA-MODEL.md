@@ -3,7 +3,7 @@
 *The engineering spine. Every entity, field, relationship, and lifecycle the prototypes imply, in one place — so the six prototypes read as one system.*
 
 **Status:** draft for engineering review · 2026-06-18
-**Source of truth:** the live prototypes at `https://taylor0832.github.io/coverpanda-prototypes/` (and this repo). Where an entity is demonstrated by a prototype, the file is cited as `[proto: …]`.
+**Source of truth:** the live prototypes at `https://coverpanda.github.io/coverpanda-prototypes/` (and this repo). Where an entity is demonstrated by a prototype, the file is cited as `[proto: …]`.
 **Pricing/economics:** all dollar figures are *proposed, under review*. Never treat the marketplace take-rate as set — it is `null`/TBD by design.
 
 ---
